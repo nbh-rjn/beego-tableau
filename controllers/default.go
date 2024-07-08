@@ -95,7 +95,6 @@ func (c *TableauController) PostAuth() {
 	}
 
 	cred_token := utils.Get_token(string(responseBody))
-	//fmt.Println(cred_token)
 
 	// Return response data
 	c.Data["json"] = map[string]interface{}{"credential_token": cred_token}
