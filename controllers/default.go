@@ -50,23 +50,11 @@ func (c *TableauController) PostAuth() {
 	personalAccessTokenSecret := reqBody.PersonalAccessTokenSecret
 	contentUrl := reqBody.ContentUrl
 
+	//  make xml request body
 	xmlData := utils.Make_xml(personalAccessTokenName, personalAccessTokenSecret, contentUrl)
-	// just for debugging
-	//fmt.Println(xmlData)
-	//fmt.Println("personalAccessTokenName:", personalAccessTokenName)
-	//fmt.Println("personalAccessTokenSecret:", personalAccessTokenSecret)
-	//fmt.Println("contentUrl:", contentUrl)
 
-	//  success !!
-	//c.Data["json"] = map[string]string{"message": "Authentication request received"}
-	//c.ServeJSON()
-
-	//  POST request to Tableau API endpoint
-	//url := "https://10ax.online.tableau.com/api/3.4/auth/signin"
-
+	// send req to tableau api, recieve response
 	resp, u_err := utils.Tableau_req(xmlData)
-
-	//req, err := http.NewRequest("POST", url, bytes.NewBufferString(xmlData))
 
 	if u_err != nil {
 		fmt.Println("Error creating request:", u_err)
@@ -77,6 +65,7 @@ func (c *TableauController) PostAuth() {
 
 	defer resp.Body.Close()
 
+	// check for error in response
 	if resp.StatusCode != http.StatusOK {
 		fmt.Println("Request failed. Status code:", resp.StatusCode)
 		c.Data["json"] = map[string]string{"error": "Request failed"}
@@ -94,6 +83,7 @@ func (c *TableauController) PostAuth() {
 		return
 	}
 
+	// extract token from response
 	cred_token := utils.Get_token(string(responseBody))
 
 	// Return response data
