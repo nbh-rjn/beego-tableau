@@ -1,55 +1,13 @@
 package utils
 
 import (
+	"beego-project/models"
 	"encoding/csv"
 	"fmt"
 	"os"
 )
 
-type CSVRecords struct {
-	Id                string `csv:"Id"`
-	Datasource        string `csv:"Datasource"`
-	Host              string `csv:"Host"`
-	Port              string `csv:"Port"`
-	DatabaseType      string `csv:"DatabaseType"`
-	DBUsername        string `csv:"DBUsername"`
-	Database          string `csv:"Database"`
-	Schema            string `csv:"Schema"`
-	Table             string `csv:"Table"`
-	TableType         string `csv:"TableType"`
-	ContentProfiles   string `csv:"ContentProfiles"`
-	Column            string `csv:"Column"`
-	ColumnType        string `csv:"ColumnType"`
-	ColumnDescription string `csv:"ColumnDescription"`
-	DataElements      string `csv:"DataElements"`
-}
-type ColumnStruct struct {
-	ColumnName        string
-	ColumnType        string
-	ColumnDescription string
-	DataElements      string
-}
-
-type TableStruct struct {
-	Id              string
-	TableName       string
-	TableType       string
-	ContentProfiles string
-	Columns         []ColumnStruct
-}
-
-type DatasourceStruct struct {
-	Datasource string
-	Host       string
-	Port       string
-	Database   string
-	Schema     string
-	DBUsername string
-	DBType     string
-	Tables     []TableStruct
-}
-
-func ParseCSV(filename string) []DatasourceStruct {
+func ParseCSV(filename string) []models.DatasourceStruct {
 
 	// open file
 	file, err := os.Open(filename)
@@ -68,14 +26,14 @@ func ParseCSV(filename string) []DatasourceStruct {
 	}
 
 	// create empty array
-	var fcrecords []CSVRecords
+	var fcrecords []models.CSVRecords
 
 	for i, record := range records {
 		if i == 0 {
 			continue
 		}
 		// store record values in elements of struct
-		fcrecord := CSVRecords{
+		fcrecord := models.CSVRecords{
 			Id:                record[0],
 			Datasource:        record[1],
 			Host:              record[2],
@@ -104,16 +62,16 @@ func ParseCSV(filename string) []DatasourceStruct {
 // takes fcrecords which is just a single line of csv file
 // returns hierarchically arranged slice of structs
 // each struct representing one datasource
-func organizeRecords(records []CSVRecords) []DatasourceStruct {
+func organizeRecords(records []models.CSVRecords) []models.DatasourceStruct {
 
-	var datasources []DatasourceStruct
+	var datasources []models.DatasourceStruct
 	ds_idx, tb_idx := "", ""
 	dsi, tbi := -1, -1
 
 	for _, record := range records {
 
 		if ds_idx != record.Datasource {
-			ds := DatasourceStruct{
+			ds := models.DatasourceStruct{
 				Datasource: record.Datasource,
 				Host:       record.Host,
 				Port:       record.Port,
@@ -129,7 +87,7 @@ func organizeRecords(records []CSVRecords) []DatasourceStruct {
 
 		} else {
 			if tb_idx != record.Table {
-				tb := TableStruct{
+				tb := models.TableStruct{
 					Id:              record.Id,
 					TableName:       record.Table,
 					TableType:       record.TableType,
@@ -140,7 +98,7 @@ func organizeRecords(records []CSVRecords) []DatasourceStruct {
 				tb_idx = record.Table
 				tbi = tbi + 1
 			}
-			col := ColumnStruct{
+			col := models.ColumnStruct{
 				ColumnName:        record.Column,
 				ColumnType:        record.ColumnType,
 				ColumnDescription: record.ColumnDescription,

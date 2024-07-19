@@ -11,7 +11,7 @@ import (
 )
 
 func PublishDatasource(filenameTDS string, siteID string, datasourceName string) error {
-	url := "https://10ax.online.tableau.com/api/3.20/sites/" + siteID + "/datasources?datasourceType=tds&overwrite=true"
+	url := models.TableauURL() + "sites/" + siteID + "/datasources?datasourceType=tds&overwrite=true"
 
 	// Construct request payload
 	requestPayload := `<tsRequest><datasource name="` + datasourceName + `"></datasource></tsRequest>`

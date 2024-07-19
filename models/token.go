@@ -11,3 +11,7 @@ func SaveToken(t string) {
 func Get_token() string {
 	return credential_token
 }
+
+func TableauURL() string {
+	return "https://10ax.online.tableau.com/api/3.20/"
+}

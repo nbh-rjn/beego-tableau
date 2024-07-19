@@ -1,119 +1,13 @@
 package utils
 
 import (
+	"beego-project/models"
 	"encoding/xml"
 	"fmt"
 	"os"
 )
 
-type DatasourceGeneration struct {
-	Datasource
-	FormattedName      string             `xml:"formatted-name,attr"`
-	Inline             bool               `xml:"inline,attr"`
-	SourcePlatform     string             `xml:"source-platform,attr"`
-	Version            string             `xml:"version,attr"`
-	XMLBase            string             `xml:"xml:base,attr"`
-	XMLNSUser          string             `xml:"xmlns:user,attr"`
-	RepositoryLocation RepositoryLocation `xml:"repository-location"`
-	Connection         Connection         `xml:"connection"`
-	Aliases            Aliases            `xml:"aliases"`
-	Columns            []Column           `xml:"column"`
-}
-
-type RepositoryLocation struct {
-	XMLName  xml.Name `xml:"repository-location"`
-	ID       string   `xml:"id,attr"`
-	Path     string   `xml:"path,attr"`
-	Revision string   `xml:"revision,attr"`
-	Site     string   `xml:"site,attr"`
-}
-
-type Connection struct {
-	XMLName         xml.Name        `xml:"connection"`
-	Class           string          `xml:"class,attr"`
-	DBName          string          `xml:"dbname,attr"`
-	Server          string          `xml:"server,attr"`
-	Relations       []Relation      `xml:"relation"`
-	MetadataRecords MetadataRecords `xml:"metadata-records"`
-}
-
-type MetadataRecords struct {
-	Records []MetadataRecord `xml:"metadata-record"`
-}
-
-type Relation struct {
-	XMLName xml.Name `xml:"relation"`
-	Name    string   `xml:"name,attr"`
-	Table   string   `xml:"table,attr"`
-	Type    string   `xml:"type,attr"`
-}
-
-type MetadataRecord struct {
-	XMLName      xml.Name `xml:"metadata-record"`
-	Class        string   `xml:"class,attr"`
-	RemoteName   string   `xml:"remote-name"`
-	RemoteType   int      `xml:"remote-type"`
-	LocalName    string   `xml:"local-name"`
-	ParentName   string   `xml:"parent-name"`
-	LocalType    string   `xml:"local-type"`
-	ContainsNull bool     `xml:"contains-null"`
-	RemoteAlias  string   `xml:"remote-alias"`
-	Ordinal      int      `xml:"ordinal"`
-}
-
-type Aliases struct {
-	Enabled string `xml:"enabled,attr"`
-}
-
-type Column struct {
-	XMLName  xml.Name `xml:"column"`
-	Caption  string   `xml:"caption,attr"`
-	Datatype string   `xml:"datatype,attr"`
-	Name     string   `xml:"name,attr"`
-	Role     string   `xml:"role,attr"`
-	Type     string   `xml:"type,attr"`
-}
-
-func generateTDSBody(formattedName string, inline bool, sourcePlatform string, version string, xmlBase string, xmlnsUser string, datasource DatasourceStruct) ([]byte, error) {
-	ds := DatasourceGeneration{
-		FormattedName:  formattedName,
-		Inline:         inline,
-		SourcePlatform: sourcePlatform,
-		Version:        version,
-		XMLBase:        xmlBase,
-		XMLNSUser:      xmlnsUser,
-		RepositoryLocation: RepositoryLocation{
-			ID:       datasource.Datasource,
-			Path:     "/t/testsiteintern/datasources", // replace
-			Revision: "1.0",
-			Site:     "testsiteintern", // replace
-		},
-		Connection: Connection{
-			Class:     "sqlserver",
-			DBName:    datasource.Database,
-			Server:    datasource.DBType,
-			Relations: getRelations(datasource),
-			MetadataRecords: MetadataRecords{
-				Records: getMetadataRecords(datasource),
-			},
-		},
-		Aliases: Aliases{
-			Enabled: "yes",
-		},
-		Columns: getColumns(datasource),
-	}
-
-	xmlData, err := xml.MarshalIndent(ds, "", "\t")
-	if err != nil {
-		return nil, err
-	}
-
-	xmlHeader := []byte(xml.Header)
-	xmlOutput := append(xmlHeader, xmlData...)
-	return xmlOutput, nil
-}
-
-func GenerateTDSFile(filenameTDS string, datasources []DatasourceStruct) error {
+func GenerateTDSFile(filenameTDS string, datasources []models.DatasourceStruct) error {
 	// create xml for file content
 	tdsBody, err := generateTDSBody("test", true, "win", "18.1", "https://10ax.online.tableau.com", "http://www.tableausoftware.com/xml/user", datasources[0])
 	if err != nil {
@@ -134,11 +28,49 @@ func GenerateTDSFile(filenameTDS string, datasources []DatasourceStruct) error {
 
 	return nil
 }
+func generateTDSBody(formattedName string, inline bool, sourcePlatform string, version string, xmlBase string, xmlnsUser string, datasource models.DatasourceStruct) ([]byte, error) {
+	ds := models.DatasourceGeneration{
+		FormattedName:  formattedName,
+		Inline:         inline,
+		SourcePlatform: sourcePlatform,
+		Version:        version,
+		XMLBase:        xmlBase,
+		XMLNSUser:      xmlnsUser,
+		RepositoryLocation: models.RepositoryLocation{
+			ID:       datasource.Datasource,
+			Path:     "/t/testsiteintern/datasources", // replace
+			Revision: "1.0",
+			Site:     "testsiteintern", // replace
+		},
+		Connection: models.Connection{
+			Class:     "sqlserver",
+			DBName:    datasource.Database,
+			Server:    datasource.DBType,
+			Relations: getRelations(datasource),
+			MetadataRecords: models.MetadataRecords{
+				Records: getMetadataRecords(datasource),
+			},
+		},
+		Aliases: models.Aliases{
+			Enabled: "yes",
+		},
+		Columns: getColumns(datasource),
+	}
 
-func getRelations(datasource DatasourceStruct) []Relation {
-	var relations []Relation
+	xmlData, err := xml.MarshalIndent(ds, "", "\t")
+	if err != nil {
+		return nil, err
+	}
+
+	xmlHeader := []byte(xml.Header)
+	xmlOutput := append(xmlHeader, xmlData...)
+	return xmlOutput, nil
+}
+
+func getRelations(datasource models.DatasourceStruct) []models.Relation {
+	var relations []models.Relation
 	for _, table := range datasource.Tables {
-		relation := Relation{
+		relation := models.Relation{
 			Name:  fmt.Sprintf("[%s]", table.TableName),
 			Table: fmt.Sprintf("[%s].[%s]", datasource.Schema, table.TableName),
 			Type:  "table",
@@ -148,13 +80,13 @@ func getRelations(datasource DatasourceStruct) []Relation {
 	return relations
 }
 
-func getMetadataRecords(datasource DatasourceStruct) []MetadataRecord {
+func getMetadataRecords(datasource models.DatasourceStruct) []models.MetadataRecord {
 
-	var metadatarecords []MetadataRecord
+	var metadatarecords []models.MetadataRecord
 
 	for _, table := range datasource.Tables {
 		for _, column := range table.Columns {
-			metadatarecord := MetadataRecord{
+			metadatarecord := models.MetadataRecord{
 				Class:        "column",
 				RemoteName:   fmt.Sprintf("%s.%s", table.TableName, column.ColumnName),   //
 				RemoteType:   3,                                                          // idk what this value is yet so i will leave it hardcoded like the example for now
@@ -173,12 +105,12 @@ func getMetadataRecords(datasource DatasourceStruct) []MetadataRecord {
 
 }
 
-func getColumns(datasource DatasourceStruct) []Column {
-	var columns []Column
+func getColumns(datasource models.DatasourceStruct) []models.Column {
+	var columns []models.Column
 
 	for _, table := range datasource.Tables {
 		for _, column := range table.Columns {
-			col := Column{
+			col := models.Column{
 				Caption:  fmt.Sprintf("%s.%s", table.TableName, column.ColumnName),   //
 				Datatype: standardiseDatatypes(column.ColumnType),                    //"integer",
 				Name:     fmt.Sprintf("[%s.%s]", table.TableName, column.ColumnName), //

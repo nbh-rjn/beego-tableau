@@ -2,6 +2,7 @@ package lib
 
 import (
 	"archive/zip"
+	"beego-project/models"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 )
 
 func TableauDownloadDataSource(token string, siteID string, datasourceID string) error {
-	url := "https://10ax.online.tableau.com/api/3.4/sites/" + siteID + "/datasources/" + datasourceID + "/content"
+	url := models.TableauURL() + "sites/" + siteID + "/datasources/" + datasourceID + "/content"
 
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {

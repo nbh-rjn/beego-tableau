@@ -1,12 +1,13 @@
 package lib
 
 import (
+	"beego-project/models"
 	"bytes"
 	"net/http"
 )
 
 func TableauAuthRequest(xmlData string) (*http.Response, error) {
-	url := "https://10ax.online.tableau.com/api/3.4/auth/signin"
+	url := models.TableauURL() + "auth/signin"
 
 	// new post request
 	request, err := http.NewRequest("POST", url, bytes.NewBufferString(xmlData))

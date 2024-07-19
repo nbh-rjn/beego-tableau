@@ -6,7 +6,7 @@ import (
 	"beego-project/utils"
 
 	//"fmt"
-	"io"
+
 	"net/http"
 
 	beego "github.com/beego/beego/v2/server/web"
@@ -16,20 +16,14 @@ type TableauController struct {
 	beego.Controller
 }
 
-type credentialStruct struct {
-	PersonalAccessTokenName   string `json:"personalAccessTokenName"`
-	PersonalAccessTokenSecret string `json:"personalAccessTokenSecret"`
-	ContentUrl                string `json:"contentUrl"`
-}
-
 func (c *TableauController) PostAuth() {
 
 	// no .tpl to render
 	c.EnableRender = false
 
-	var requestBody credentialStruct
+	var requestBody models.CredentialStruct
 
-	// read auth request and handle error
+	// read auth request
 	if err := c.BindJSON(&requestBody); err != nil {
 		c.Ctx.Output.SetStatus(http.StatusBadRequest)
 		c.Data["json"] = map[string]string{"error": "Invalid JSON format in request"}
@@ -44,16 +38,11 @@ func (c *TableauController) PostAuth() {
 		requestBody.ContentUrl,
 	)
 
-	// send request to tableau api, recieve response
+	// send request to tableau api
 	response, err := lib.TableauAuthRequest(xmlData)
-
-	// error in creating our request
 	if err != nil {
 		c.Ctx.Output.SetStatus(http.StatusBadRequest)
-		c.Data["json"] = map[string]string{
-			"error":  "Failed to create authentication request to Tableau",
-			"detail": err.Error(),
-		}
+		c.Data["json"] = map[string]string{"error": err.Error()}
 		c.ServeJSON()
 		return
 	}
@@ -68,18 +57,8 @@ func (c *TableauController) PostAuth() {
 		return
 	}
 
-	// Read response body
-	responseBody, err := io.ReadAll(response.Body)
-
-	if err != nil {
-		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
-		c.Data["json"] = map[string]string{"error": "Failed to read response body"}
-		c.ServeJSON()
-		return
-	}
-
 	// extract token from response
-	credentialsToken, err := utils.ExtractToken(string(responseBody))
+	credentialsToken, err := utils.ExtractToken(response)
 	if err != nil {
 		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
 		c.Data["json"] = map[string]string{"error": "Failed to extract credentials from Tableau response"}
@@ -88,10 +67,9 @@ func (c *TableauController) PostAuth() {
 	}
 
 	// save session token
-	// so we dont have to keep including it in request body from other endpoints
 	models.SaveToken(credentialsToken)
 
 	// Return response data
-	c.Data["json"] = map[string]interface{}{"Credentials Token": credentialsToken}
+	c.Data["json"] = map[string]interface{}{"credentialsToken": credentialsToken}
 	c.ServeJSON()
 }

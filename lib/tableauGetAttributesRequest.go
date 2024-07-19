@@ -1,16 +1,33 @@
 package lib
 
-import "net/http"
+import (
+	"beego-project/models"
+	"fmt"
+	"net/http"
+)
 
-func TableauGetDataLabelValues(token string, site_id string) (*http.Response, error) {
-	url := "https://10ax.online.tableau.com/api/3.20/sites/" + site_id + "/labelValues"
+func TableauGetAttribute(param string, site_id string) (*http.Response, error) {
+	var attribute string
+
+	switch param {
+	case "datalabels":
+		attribute = "/labelValues"
+	case "datasources":
+		attribute = "/datasources"
+	case "projects":
+		attribute = "/projects"
+	default:
+		return nil, fmt.Errorf("invalid attribute")
+	}
+
+	url := models.TableauURL() + "sites/" + site_id + attribute
 
 	// make new get request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("X-Tableau-Auth", token)
+	req.Header.Set("X-Tableau-Auth", models.Get_token())
 
 	// send using client
 	client := &http.Client{}
@@ -20,42 +37,5 @@ func TableauGetDataLabelValues(token string, site_id string) (*http.Response, er
 	}
 
 	return resp, nil
-}
 
-func TableauGetDataSources(token string, site_id string) (*http.Response, error) {
-	url := "https://10ax.online.tableau.com/api/3.4/sites/" + site_id + "/datasources"
-
-	request, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	request.Header.Set("X-Tableau-Auth", token)
-
-	client := &http.Client{}
-	response, err := client.Do(request)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
-
-func TableauGetProjects(token string, site_id string) (*http.Response, error) {
-	url := "https://10ax.online.tableau.com/api/3.20/sites/" + site_id + "/projects"
-
-	// make new get request
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("X-Tableau-Auth", token)
-
-	// send using client
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
 }
