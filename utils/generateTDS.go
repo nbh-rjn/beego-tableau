@@ -6,8 +6,8 @@ import (
 	"os"
 )
 
-type Datasource struct {
-	XMLName            xml.Name           `xml:"datasource"`
+type DatasourceGeneration struct {
+	Datasource
 	FormattedName      string             `xml:"formatted-name,attr"`
 	Inline             bool               `xml:"inline,attr"`
 	SourcePlatform     string             `xml:"source-platform,attr"`
@@ -29,12 +29,16 @@ type RepositoryLocation struct {
 }
 
 type Connection struct {
-	XMLName         xml.Name         `xml:"connection"`
-	Class           string           `xml:"class,attr"`
-	DBName          string           `xml:"dbname,attr"`
-	Server          string           `xml:"server,attr"`
-	Relations       []Relation       `xml:"relation"`
-	MetadataRecords []MetadataRecord `xml:"metadata-records"`
+	XMLName         xml.Name        `xml:"connection"`
+	Class           string          `xml:"class,attr"`
+	DBName          string          `xml:"dbname,attr"`
+	Server          string          `xml:"server,attr"`
+	Relations       []Relation      `xml:"relation"`
+	MetadataRecords MetadataRecords `xml:"metadata-records"`
+}
+
+type MetadataRecords struct {
+	Records []MetadataRecord `xml:"metadata-record"`
 }
 
 type Relation struct {
@@ -70,8 +74,8 @@ type Column struct {
 	Type     string   `xml:"type,attr"`
 }
 
-func GenerateXML(formattedName string, inline bool, sourcePlatform string, version string, xmlBase string, xmlnsUser string, datasource DatasourceStruct) ([]byte, error) {
-	ds := Datasource{
+func generateTDS(formattedName string, inline bool, sourcePlatform string, version string, xmlBase string, xmlnsUser string, datasource DatasourceStruct) ([]byte, error) {
+	ds := DatasourceGeneration{
 		FormattedName:  formattedName,
 		Inline:         inline,
 		SourcePlatform: sourcePlatform,
@@ -79,23 +83,24 @@ func GenerateXML(formattedName string, inline bool, sourcePlatform string, versi
 		XMLBase:        xmlBase,
 		XMLNSUser:      xmlnsUser,
 		RepositoryLocation: RepositoryLocation{
-			//path and site hardcoded for now
-			ID:       datasource.Datasource, //"newdatasource5",
-			Path:     "/t/testsiteintern/datasources",
+			ID:       datasource.Datasource,
+			Path:     "/t/testsiteintern/datasources", // replace
 			Revision: "1.0",
-			Site:     "testsiteintern",
+			Site:     "testsiteintern", // replace
 		},
 		Connection: Connection{
-			Class:           "sqlserver",
-			DBName:          datasource.Database, //"SampleDatabase2",
-			Server:          datasource.DBType,   //"127.0.0.1",
-			Relations:       getrelations(datasource),
-			MetadataRecords: getmetadatarecords(datasource),
+			Class:     "sqlserver",
+			DBName:    datasource.Database,
+			Server:    datasource.DBType,
+			Relations: getRelations(datasource),
+			MetadataRecords: MetadataRecords{
+				Records: getMetadataRecords(datasource),
+			},
 		},
 		Aliases: Aliases{
 			Enabled: "yes",
 		},
-		Columns: getcolumns(datasource),
+		Columns: getColumns(datasource),
 	}
 
 	xmlData, err := xml.MarshalIndent(ds, "", "\t")
@@ -108,30 +113,30 @@ func GenerateXML(formattedName string, inline bool, sourcePlatform string, versi
 	return xmlOutput, nil
 }
 
-func Gen_xml(datasources []DatasourceStruct) {
-	xmlData, err := GenerateXML("test", true, "win", "18.1", "https://10ax.online.tableau.com", "http://www.tableausoftware.com/xml/user", datasources[0])
+func GenerateTDSFile(datasources []DatasourceStruct) error {
+	// create xml for file content
+	tdsData, err := generateTDS("test", true, "win", "18.1", "https://10ax.online.tableau.com", "http://www.tableausoftware.com/xml/user", datasources[0])
 	if err != nil {
-		fmt.Println("Error generating XML:", err)
-		return
+		return err
 	}
 
-	file, err := os.Create("xml.tds")
+	// create tds file
+	file, err := os.Create("sync.tds")
 	if err != nil {
-		fmt.Println("error creating file . . . ")
-		return
-
+		return err
 	}
 	defer file.Close()
 
-	_, err = file.Write(xmlData)
+	// write to file
+	_, err = file.Write(tdsData)
 	if err != nil {
-		fmt.Println("error writing data . . .")
-		return
+		return err
 	}
-	fmt.Println(string(xmlData))
+
+	return nil
 }
 
-func getrelations(datasource DatasourceStruct) []Relation {
+func getRelations(datasource DatasourceStruct) []Relation {
 	var relations []Relation
 	for _, table := range datasource.Tables {
 		relation := Relation{
@@ -144,7 +149,7 @@ func getrelations(datasource DatasourceStruct) []Relation {
 	return relations
 }
 
-func getmetadatarecords(datasource DatasourceStruct) []MetadataRecord {
+func getMetadataRecords(datasource DatasourceStruct) []MetadataRecord {
 
 	var metadatarecords []MetadataRecord
 
@@ -152,14 +157,14 @@ func getmetadatarecords(datasource DatasourceStruct) []MetadataRecord {
 		for _, column := range table.Columns {
 			metadatarecord := MetadataRecord{
 				Class:        "column",
-				RemoteName:   column.ColumnName,
-				RemoteType:   3, // idk what this value is yet so i will leave it hardcoded like the example for now
-				LocalName:    fmt.Sprintf("[%s]", column.ColumnName),
+				RemoteName:   fmt.Sprintf("%s.%s", table.TableName, column.ColumnName),   //
+				RemoteType:   3,                                                          // idk what this value is yet so i will leave it hardcoded like the example for now
+				LocalName:    fmt.Sprintf("[%s.%s]", table.TableName, column.ColumnName), //
 				ParentName:   fmt.Sprintf("[%s]", table.TableName),
-				LocalType:    column.ColumnType,
-				ContainsNull: true, // assuming, since no nullflag in csv
-				RemoteAlias:  column.ColumnName,
-				Ordinal:      6, // idk what this value is yet so i will leave it hardcoded like the example for now
+				LocalType:    standardiseDatatypes(column.ColumnType),
+				ContainsNull: true,                                                     // assuming, since no nullflag in csv
+				RemoteAlias:  fmt.Sprintf("%s.%s", table.TableName, column.ColumnName), //
+				Ordinal:      6,                                                        // idk what this value is yet so i will leave it hardcoded like the example for now
 			}
 			metadatarecords = append(metadatarecords, metadatarecord)
 		}
@@ -169,15 +174,15 @@ func getmetadatarecords(datasource DatasourceStruct) []MetadataRecord {
 
 }
 
-func getcolumns(datasource DatasourceStruct) []Column {
+func getColumns(datasource DatasourceStruct) []Column {
 	var columns []Column
 
 	for _, table := range datasource.Tables {
 		for _, column := range table.Columns {
 			col := Column{
-				Caption:  column.ColumnName,                      //"OrderID",
-				Datatype: column.ColumnType,                      //"integer",
-				Name:     fmt.Sprintf("[%s]", column.ColumnName), //"[OrderID]",
+				Caption:  fmt.Sprintf("%s.%s", table.TableName, column.ColumnName),   //
+				Datatype: standardiseDatatypes(column.ColumnType),                    //"integer",
+				Name:     fmt.Sprintf("[%s.%s]", table.TableName, column.ColumnName), //
 				Role:     "dimension",
 				Type:     "nominal",
 			}
@@ -186,4 +191,96 @@ func getcolumns(datasource DatasourceStruct) []Column {
 		}
 	}
 	return columns
+}
+
+func standardiseDatatypes(old_data_type string) string {
+	typeMaps := map[string]string{
+		// Mapping old data types to standardized data types
+		"char":                        "string",
+		"varchar":                     "string",
+		"text":                        "string",
+		"character varying":           "string",
+		"character":                   "string",
+		"uuid":                        "string",
+		"nvarchar2":                   "string",
+		"nchar":                       "string",
+		"string":                      "string",
+		"national character varying":  "string",
+		"national character":          "string",
+		"character large object":      "string",
+		"clob":                        "string",
+		"long":                        "string",
+		"long text":                   "string",
+		"mediumtext":                  "string",
+		"tinytext":                    "string",
+		"long varchar":                "string",
+		"longnvarchar":                "string",
+		"uniqueidentifier":            "string",
+		"nstring":                     "string",
+		"nvarchar":                    "string",
+		"nchar varying":               "string",
+		"nclob":                       "string",
+		"ntext":                       "string",
+		"json":                        "string",
+		"jsonb":                       "string",
+		"xml":                         "string",
+		"varchar(max)":                "string",
+		"nvarchar(max)":               "string",
+		"mpaa_rating":                 "string",
+		"decimal":                     "real",
+		"numeric":                     "real",
+		"float":                       "real",
+		"double":                      "real",
+		"real":                        "real",
+		"money":                       "real",
+		"smallmoney":                  "real",
+		"tinyint":                     "integer",
+		"smallint":                    "integer",
+		"mediumint":                   "integer",
+		"int":                         "integer",
+		"integer":                     "integer",
+		"bigint":                      "integer",
+		"number":                      "integer",
+		"smallserial":                 "integer",
+		"serial":                      "integer",
+		"bigserial":                   "integer",
+		"int4":                        "integer",
+		"int2":                        "integer",
+		"date":                        "date",
+		"year":                        "date",
+		"year to month":               "date",
+		"year to second":              "date",
+		"month":                       "date",
+		"day":                         "date",
+		"yearmonth":                   "date",
+		"year to fraction":            "date",
+		"datetime":                    "datetime",
+		"smalldatetime":               "datetime",
+		"datetime2":                   "datetime",
+		"datetimeoffset":              "datetime",
+		"timestamp":                   "datetime",
+		"timestamp without time zone": "datetime",
+		"timestamp with time zone":    "datetime",
+		"time":                        "datetime",
+		"time without time zone":      "datetime",
+		"time with time zone":         "datetime",
+		"interval":                    "datetime",
+		"hour":                        "datetime",
+		"minute":                      "datetime",
+		"second":                      "datetime",
+		"fraction":                    "datetime",
+		"timetz":                      "datetime",
+		"boolean":                     "boolean",
+		"bool":                        "boolean",
+		"bit":                         "boolean",
+	}
+
+	// Lookup the old_data_type in the map
+	new_data_type, ok := typeMaps[old_data_type]
+	if !ok {
+		// Handle case where old_data_type is not found (optional)
+		return "TEST" // or some default value
+	}
+
+	return new_data_type
 }

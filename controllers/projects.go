@@ -6,28 +6,17 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-
-	beego "github.com/beego/beego/v2/server/web"
 )
 
-type TableauControllerProjects struct {
-	beego.Controller
-}
-
-func (c *TableauControllerProjects) GetProjects() {
+func (c *TableauController) GetProjects() {
 	// so it doesnt go looking in views for a tpl to render
 	c.EnableRender = false
 
-	type SiteRequest struct {
-		SiteID string `json:"siteID"`
-	}
-	var req SiteRequest
+	var request SiteRequest
 
-	// DON'T REPLACE Ctx.Input.CopyBody WITH Ctx.Input.RequestBody
-	// OTHERWISE ERROR "unexpected end of json input"
-	// ie json will be empty
+	// dont use Ctx.Input.RequestBody
 
-	err := json.Unmarshal((c.Ctx.Input.CopyBody(1000)), &req)
+	err := json.Unmarshal((c.Ctx.Input.CopyBody(1000)), &request)
 
 	// check JSON format
 	if err != nil {
@@ -38,7 +27,7 @@ func (c *TableauControllerProjects) GetProjects() {
 	}
 
 	// utility function to communicate with Tableau api
-	response, err := utils.Tableau_get_projects(models.Get_token(), req.SiteID)
+	response, err := utils.TableauGetProjects(models.Get_token(), request.SiteID)
 	if err != nil {
 		c.Data["json"] = map[string]string{"error": "Failed to fetch data sources from Tableau"}
 		c.ServeJSON()
@@ -46,13 +35,25 @@ func (c *TableauControllerProjects) GetProjects() {
 	}
 
 	// read response body
-	bodyread, _ := io.ReadAll(response.Body)
+	responseBody, _ := io.ReadAll(response.Body)
 
 	// utility function to extract relevant info
-	projectnames, _, _ := utils.ExtractProjectNames(string(bodyread))
+	projectNames, projectIDs, _ := utils.ExtractProjectNames(string(responseBody))
 
-	// return response
-	c.Data["json"] = map[string]interface{}{"projectnames": projectnames}
+	var projects []map[string]interface{}
+	for i := 0; i < len(projectNames); i++ {
+		projects = append(projects, map[string]interface{}{
+			"Name": projectNames[i],
+			"ID":   projectIDs[i],
+		})
+	}
+
+	// Set response data
+	c.Data["json"] = map[string]interface{}{
+		"Projects": projects,
+	}
+
+	// Serve JSON response
 	c.ServeJSON()
 
 }

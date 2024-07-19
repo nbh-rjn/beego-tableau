@@ -6,25 +6,16 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-
-	beego "github.com/beego/beego/v2/server/web"
 )
 
-type TableauControllerDS struct {
-	beego.Controller
-}
-
-func (c *TableauControllerDS) GetDataSources() {
+func (c *TableauController) GetDataSources() {
 	// so it doesnt go looking in views for a tpl to render
 	c.EnableRender = false
 
-	type SiteRequest struct {
-		SiteID string `json:"siteID"`
-	}
-	var req SiteRequest
+	var request SiteRequest
 
-	// DON'T REPLACE Ctx.Input.CopyBody WITH Ctx.Input.RequestBody
-	err := json.Unmarshal((c.Ctx.Input.CopyBody(1000)), &req)
+	// dont use Ctx.Input.RequestBody
+	err := json.Unmarshal((c.Ctx.Input.CopyBody(1000)), &request)
 
 	// check for correct request format
 	if err != nil {
@@ -35,7 +26,7 @@ func (c *TableauControllerDS) GetDataSources() {
 	}
 
 	// utility function to communicate with Tableau API
-	response, err := utils.Tableau_get_data_sources(models.Get_token(), req.SiteID)
+	response, err := utils.TableauGetDataSources(models.Get_token(), request.SiteID)
 	if err != nil {
 		c.Data["json"] = map[string]string{"error": "Failed to fetch data sources from Tableau"}
 		c.ServeJSON()
@@ -43,13 +34,29 @@ func (c *TableauControllerDS) GetDataSources() {
 	}
 
 	// read body of response
-	bodyread, _ := io.ReadAll(response.Body)
+	responseBody, _ := io.ReadAll(response.Body)
 
 	// utility function to extract relevant info
-	datasources, _ := utils.Extract_data_sources_xml(string(bodyread))
+	datasourceNames, datasourceIDs := utils.ExtractDataSources(string(responseBody))
+
+	var datasources []map[string]interface{}
+	for i := 0; i < len(datasourceNames); i++ {
+		datasources = append(datasources, map[string]interface{}{
+			"Name": datasourceNames[i],
+			"ID":   datasourceIDs[i],
+		})
+	}
+
+	// Set response data
+	c.Data["json"] = map[string]interface{}{
+		"Data sources": datasources,
+	}
+
+	// Serve JSON response
+	c.ServeJSON()
 
 	// return info in response
-	c.Data["json"] = map[string]interface{}{"datasources": datasources}
+	c.Data["json"] = map[string]interface{}{"Data sources": datasources}
 	c.ServeJSON()
 
 }

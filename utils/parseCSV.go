@@ -23,8 +23,33 @@ type FCRecords struct {
 	ColumnDescription string `csv:"ColumnDescription"`
 	DataElements      string `csv:"DataElements"`
 }
+type ColumnStruct struct {
+	ColumnName        string
+	ColumnType        string
+	ColumnDescription string
+	DataElements      string
+}
 
-func ParseCSV(filename string) []FCRecords {
+type TableStruct struct {
+	Id              string
+	TableName       string
+	TableType       string
+	ContentProfiles string
+	Columns         []ColumnStruct
+}
+
+type DatasourceStruct struct {
+	Datasource string
+	Host       string
+	Port       string
+	Database   string
+	Schema     string
+	DBUsername string
+	DBType     string
+	Tables     []TableStruct
+}
+
+func ParseCSV(filename string) []DatasourceStruct {
 
 	// open file
 	file, err := os.Open(filename)
@@ -42,7 +67,7 @@ func ParseCSV(filename string) []FCRecords {
 		return nil
 	}
 
-	// empty array
+	// create empty array
 	var fcrecords []FCRecords
 
 	for i, record := range records {
@@ -73,40 +98,16 @@ func ParseCSV(filename string) []FCRecords {
 	}
 
 	// return parsed array
-	return fcrecords
+	return organizeRecords(fcrecords)
 }
 
-type ColumnStruct struct {
-	ColumnName        string
-	ColumnType        string
-	ColumnDescription string
-	DataElements      string
-}
-
-type TableStruct struct {
-	Id              string
-	TableName       string
-	TableType       string
-	ContentProfiles string
-	Columns         []ColumnStruct
-}
-
-type DatasourceStruct struct {
-	Datasource string
-	Host       string
-	Port       string
-	Database   string
-	Schema     string
-	DBUsername string
-	DBType     string
-	Tables     []TableStruct
-}
-
-func organize_records(records []FCRecords) []DatasourceStruct {
+// takes fcrecords which is just a single line of csv file
+// returns hierarchically arranged slice of structs
+// each struct representing one datasource
+func organizeRecords(records []FCRecords) []DatasourceStruct {
 
 	var datasources []DatasourceStruct
-	ds_idx := ""
-	tb_idx := ""
+	ds_idx, tb_idx := "", ""
 	dsi, tbi := -1, -1
 
 	for _, record := range records {
@@ -138,15 +139,15 @@ func organize_records(records []FCRecords) []DatasourceStruct {
 				datasources[dsi].Tables = append(datasources[dsi].Tables, tb)
 				tb_idx = record.Table
 				tbi = tbi + 1
-			} else {
-				col := ColumnStruct{
-					ColumnName:        record.Column,
-					ColumnType:        record.ColumnType,
-					ColumnDescription: record.ColumnDescription,
-					DataElements:      record.DataElements,
-				}
-				datasources[dsi].Tables[tbi].Columns = append(datasources[dsi].Tables[tbi].Columns, col)
 			}
+			col := ColumnStruct{
+				ColumnName:        record.Column,
+				ColumnType:        record.ColumnType,
+				ColumnDescription: record.ColumnDescription,
+				DataElements:      record.DataElements,
+			}
+			datasources[dsi].Tables[tbi].Columns = append(datasources[dsi].Tables[tbi].Columns, col)
+
 		}
 	}
 

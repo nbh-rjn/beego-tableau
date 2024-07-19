@@ -22,7 +22,11 @@ sample xml response
 
 // struct to hold the XML response
 type TSResponse struct {
-	XMLName     xml.Name    `xml:"tsResponse"`
+	XMLName xml.Name `xml:"tsResponse"`
+}
+
+type AuthResponse struct {
+	TSResponse
 	Credentials Credentials `xml:"credentials"`
 }
 
@@ -43,51 +47,51 @@ type User struct {
 }
 
 // to extract token from xml response
-func Get_token(resp_body string) string {
+func ExtractToken(responseBody string) (string, error) {
 
 	// unmarshal XML using our structs
-	var response TSResponse
-	err := xml.Unmarshal([]byte(resp_body), &response)
+	var response AuthResponse
+	err := xml.Unmarshal([]byte(responseBody), &response)
 	if err != nil {
-		fmt.Println("Error unmarshalling XML:", err)
-		return ""
+		return "", err
 	}
 
 	// Extract token from the struct
 	token := response.Credentials.Token
-	return token
+	return token, nil
 }
 
 // construct xml request to tableau api
 // using the info from the request to beego
-func Make_xml(pat string, pats string, siteid string) string {
+func CredentialsXML(PersonalAccessTokenName string, PersonalAccessTokenSecret string, ContentUrl string) string {
+
 	xml := fmt.Sprintf(
 		`<tsRequest>
 		            <credentials personalAccessTokenName="%s"
 		                personalAccessTokenSecret="%s">
 		                	<site contentUrl="%s" />
 		            </credentials>
-		        </tsRequest>`, pat, pats, siteid)
+		        </tsRequest>`, PersonalAccessTokenName, PersonalAccessTokenSecret, ContentUrl)
 	return xml
 }
 
 // communicating with tableau api
-func Tableau_auth_req(xmlData string) (*http.Response, error) {
+func TableauAuthRequest(xmlData string) (*http.Response, error) {
 	url := "https://10ax.online.tableau.com/api/3.4/auth/signin"
 
 	// new post request
-	req, err := http.NewRequest("POST", url, bytes.NewBufferString(xmlData))
+	request, err := http.NewRequest("POST", url, bytes.NewBufferString(xmlData))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/xml")
+	request.Header.Set("Content-Type", "application/xml")
 
-	// send req using client
+	// send request using client
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	response, err := client.Do(request)
 	if err != nil {
 		return nil, err
 	}
-	return resp, nil
+	return response, nil
 
 }

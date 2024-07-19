@@ -7,10 +7,12 @@ import (
 )
 
 func init() {
-	beego.Router("/", &controllers.MainController{})
+	beego.Router("/", &controllers.TableauController{})
+
 	beego.Router("/authenticate", &controllers.TableauController{}, "post:PostAuth")
-	beego.Router("/datasources", &controllers.TableauControllerDS{}, "get:GetDataSources")
-	beego.Router("/datalabels", &controllers.TableauControllerDL{}, "get:GetDataLabels")
-	beego.Router("/projects", &controllers.TableauControllerProjects{}, "get:GetProjects")
-	beego.Router("/sync", &controllers.TableauControllerCSV{}, "post:PostSync")
+	beego.Router("/sync", &controllers.TableauController{}, "post:PostSync")
+	beego.Router("/download", &controllers.TableauController{}, "get:DownloadDataSource")
+
+	// fetching projects, datasources, datalabels, etc . . .
+	beego.Router("/attribute/:param", &controllers.TableauController{}, "get:GetAttribute")
 }

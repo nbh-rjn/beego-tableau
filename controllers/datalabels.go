@@ -6,28 +6,20 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-
-	beego "github.com/beego/beego/v2/server/web"
 )
 
-type TableauControllerDL struct {
-	beego.Controller
+type SiteRequest struct {
+	SiteID string `json:"siteID"`
 }
 
-func (c *TableauControllerDL) GetDataLabels() {
+func (c *TableauController) GetDataLabels() {
 	// so it doesnt go looking in views for a tpl to render
 	c.EnableRender = false
 
-	type SiteRequest struct {
-		SiteID string `json:"siteID"`
-	}
-	var req SiteRequest
+	var request SiteRequest
 
-	// DON'T REPLACE Ctx.Input.CopyBody WITH Ctx.Input.RequestBody
-	// OTHERWISE ERROR "unexpected end of json input"
-	// ie json will be empty
-
-	err := json.Unmarshal((c.Ctx.Input.CopyBody(1000)), &req)
+	// dont use Ctx.Input.RequestBody
+	err := json.Unmarshal((c.Ctx.Input.CopyBody(1000)), &request)
 
 	// check JSON format
 	if err != nil {
@@ -37,8 +29,8 @@ func (c *TableauControllerDL) GetDataLabels() {
 		return
 	}
 
-	// utility function to communicate with Tableau api
-	response, err := utils.Tableau_get_data_label_values(models.Get_token(), req.SiteID)
+	// use utility function to communicate with Tableau api
+	response, err := utils.TableauGetDataLabelValues(models.Get_token(), request.SiteID)
 	if err != nil {
 		c.Data["json"] = map[string]string{"error": "Failed to fetch data sources from Tableau"}
 		c.ServeJSON()
@@ -46,13 +38,13 @@ func (c *TableauControllerDL) GetDataLabels() {
 	}
 
 	// read response body
-	bodyread, _ := io.ReadAll(response.Body)
+	responseBody, _ := io.ReadAll(response.Body)
 
 	// utility function to extract relevant info
-	labels, _ := utils.ExtractLabelNames(string(bodyread))
+	dataLabels, _ := utils.ExtractLabelNames(string(responseBody))
 
 	// return response
-	c.Data["json"] = map[string]interface{}{"datalabels": labels}
+	c.Data["json"] = map[string]interface{}{"Data labels": dataLabels}
 	c.ServeJSON()
 
 }

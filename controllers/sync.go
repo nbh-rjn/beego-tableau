@@ -4,38 +4,30 @@ import (
 	"beego-project/utils"
 	"encoding/json"
 	"net/http"
-
-	beego "github.com/beego/beego/v2/server/web"
 )
 
-type TableauControllerCSV struct {
-	beego.Controller
+type AttributeMap struct {
+	DataElements   string `json:"data_elements"`
+	ContentProfile string `json:"content_profile"`
 }
 
-func (c *TableauControllerCSV) PostSync() {
+type InstanceMap map[string]string
+
+type SyncRequest struct {
+	Filename        string       `json:"filename"`
+	SiteID          string       `json:"siteID"`
+	CreateNewAssets bool         `json:"create_new_assets"`
+	EntityType      string       `json:"entity_type"`
+	AttributeMap    AttributeMap `json:"attribute_map"`
+	InstanceMap     InstanceMap  `json:"instance_map"`
+}
+
+func (c *TableauController) PostSync() {
 	c.EnableRender = false
 
-	// structs for unmarshaling the request
-
-	type AttributeMap struct {
-		DataElements   string `json:"data_elements"`
-		ContentProfile string `json:"content_profile"`
-	}
-
-	type InstanceMap map[string]string
-
-	type JsonRequest struct {
-		Filename        string       `json:"filename"`
-		SiteID          string       `json:"siteID"`
-		CreateNewAssets bool         `json:"create_new_assets"`
-		EntityType      string       `json:"entity_type"`
-		AttributeMap    AttributeMap `json:"attribute_map"`
-		InstanceMap     InstanceMap  `json:"instance_map"`
-	}
-
 	// parse request to struct
-	var req JsonRequest
-	err := json.Unmarshal((c.Ctx.Input.CopyBody(1000)), &req)
+	var request SyncRequest
+	err := json.Unmarshal((c.Ctx.Input.CopyBody(1000)), &request)
 
 	// check for errors in JSON format
 	if err != nil {
@@ -46,9 +38,23 @@ func (c *TableauControllerCSV) PostSync() {
 	}
 
 	// utility function takes file URL and returns parsed struct array
-	records := utils.ParseCSV(req.Filename)
-	utils.Tableau_sync(records, req.SiteID)
+	records := utils.ParseCSV(request.Filename)
 
-	//utils.Tableau_sync(records, req.SiteID)
+	if records == nil {
+		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
+		c.Data["json"] = map[string]string{"error": "Could not parse raw CSV file"}
+		c.ServeJSON()
+		return
+	}
+
+	// synchronize records
+	err = utils.TableauSyncRecords(records, request.SiteID)
+
+	if err != nil {
+		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
+		c.Data["json"] = map[string]string{"error": "Could not sync data sources to Tableau"}
+		c.ServeJSON()
+		return
+	}
 
 }

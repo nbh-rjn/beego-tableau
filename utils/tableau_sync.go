@@ -1,31 +1,24 @@
 package utils
 
-import (
-	"beego-project/models"
-	"fmt"
-	"io"
-	"sort"
-)
+func TableauSyncRecords(datasourceRecords []DatasourceStruct, siteID string) error {
+	for _, datasourceRecord := range datasourceRecords {
 
-func Tableau_sync(records []FCRecords, siteID string) {
-
-	hierarchy_records := organize_records(records)
-
-	// LETS GOOOOO HOGAYA
-	for _, datasource := range hierarchy_records {
-		fmt.Printf("%s \n", datasource.Datasource)
-		for _, table := range datasource.Tables {
-			fmt.Printf("\t %s \n", table.TableName)
-			for _, col := range table.Columns {
-				fmt.Printf("\t \t %s \n", col.ColumnName)
-			}
+		// generate tds file for each datasource and publish it
+		err := GenerateTDSFile(datasourceRecords)
+		if err != nil {
+			return err
 		}
+
+		err = PublishDatasource(siteID, datasourceRecord.Datasource)
+		if err != nil {
+			return err
+		}
+
 	}
-
-	Gen_xml(hierarchy_records)
-
+	return nil
 }
 
+/*
 func datasourceExists(siteID string, datasource string) bool {
 
 	response, err := Tableau_get_data_sources(models.Get_token(), siteID)
@@ -46,3 +39,4 @@ func datasourceExists(siteID string, datasource string) bool {
 
 	return found
 }
+*/

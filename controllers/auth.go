@@ -3,94 +3,91 @@ package controllers
 import (
 	"beego-project/models"
 	"beego-project/utils"
-	"fmt"
+
+	//"fmt"
 	"io"
 	"net/http"
 
 	beego "github.com/beego/beego/v2/server/web"
 )
 
-type MainController struct {
-	beego.Controller
-}
-
-func (c *MainController) Get() {
-	c.Data["Website"] = "github.com/nbh-rjn"
-	c.Data["Email"] = "nabiha.rajani@foundri.net"
-	c.TplName = "index.tpl"
-}
-
 type TableauController struct {
 	beego.Controller
 }
 
+type credentialStruct struct {
+	PersonalAccessTokenName   string `json:"personalAccessTokenName"`
+	PersonalAccessTokenSecret string `json:"personalAccessTokenSecret"`
+	ContentUrl                string `json:"contentUrl"`
+}
+
 func (c *TableauController) PostAuth() {
 
-	// this is imp otherwise it looks for tpl file to render and we get error
+	// no .tpl to render
 	c.EnableRender = false
 
-	// json to struct
-	type creds struct {
-		PersonalAccessTokenName   string `json:"personalAccessTokenName"`
-		PersonalAccessTokenSecret string `json:"personalAccessTokenSecret"`
-		ContentUrl                string `json:"contentUrl"`
-	}
-	var reqBody creds
+	var requestBody credentialStruct
 
-	// handle the errors
-	if err := c.BindJSON(&reqBody); err != nil {
+	// read auth request and handle error
+	if err := c.BindJSON(&requestBody); err != nil {
 		c.Ctx.Output.SetStatus(http.StatusBadRequest)
-		c.Data["json"] = map[string]string{"error": "Invalid JSON format"}
+		c.Data["json"] = map[string]string{"error": "Invalid JSON format in request"}
 		c.ServeJSON()
 		return
 	}
 
-	// get the creds from req body
-	personalAccessTokenName := reqBody.PersonalAccessTokenName
-	personalAccessTokenSecret := reqBody.PersonalAccessTokenSecret
-	contentUrl := reqBody.ContentUrl
+	//  make XML for request to tableau
+	xmlData := utils.CredentialsXML(
+		requestBody.PersonalAccessTokenName,
+		requestBody.PersonalAccessTokenSecret,
+		requestBody.ContentUrl,
+	)
 
-	//  make xml request body
-	xmlData := utils.Make_xml(personalAccessTokenName, personalAccessTokenSecret, contentUrl)
+	// send request to tableau api, recieve response
+	response, err := utils.TableauAuthRequest(xmlData)
 
-	// send req to tableau api, recieve response
-	resp, err := utils.Tableau_auth_req(xmlData)
-
+	// error in creating our request
 	if err != nil {
-		fmt.Println("Error creating request:", err)
-		c.Data["json"] = map[string]string{"error": "Failed to create request"}
+		c.Ctx.Output.SetStatus(http.StatusBadRequest)
+		c.Data["json"] = map[string]string{"error": "Failed to create authentication request to Tableau"}
 		c.ServeJSON()
 		return
 	}
 
-	defer resp.Body.Close()
+	defer response.Body.Close()
 
-	// check for error in response
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println("Request failed. Status code:", resp.StatusCode)
-		c.Data["json"] = map[string]string{"error": "Request failed"}
+	//  error in the response from tableau
+	if response.StatusCode != http.StatusOK {
+		c.Ctx.Output.SetStatus(http.StatusServiceUnavailable)
+		c.Data["json"] = map[string]string{"error": "Tableau response error"}
 		c.ServeJSON()
 		return
 	}
 
 	// Read response body
-	responseBody, err := io.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(response.Body)
 
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
-		c.Data["json"] = map[string]string{"error": "Failed to read response"}
+		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
+		c.Data["json"] = map[string]string{"error": "Failed to read response body"}
 		c.ServeJSON()
 		return
 	}
 
 	// extract token from response
-	cred_token := utils.Get_token(string(responseBody))
+	credentialsToken, err := utils.ExtractToken(string(responseBody))
+	if err != nil {
+		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
+		c.Data["json"] = map[string]string{"error": "Failed to extract credentials from Tableau response"}
+		c.ServeJSON()
+		return
+	}
 
 	// save session token
-	// so we dont have to keep track of it when sending requests from other endpoints
-	models.Set_token(cred_token)
+	// so we dont have to keep including it in request body from other endpoints
+	models.SaveToken(credentialsToken)
 
 	// Return response data
-	c.Data["json"] = map[string]interface{}{"credential_token": cred_token}
+	c.Data["json"] = map[string]interface{}{"Credentials Token": credentialsToken}
 	c.ServeJSON()
 }
