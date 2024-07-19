@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"beego-project/lib"
 	"beego-project/models"
 	"beego-project/utils"
 	"encoding/json"
@@ -27,7 +28,7 @@ func (c *TableauController) GetProjects() {
 	}
 
 	// utility function to communicate with Tableau api
-	response, err := utils.TableauGetProjects(models.Get_token(), request.SiteID)
+	response, err := lib.TableauGetProjects(models.Get_token(), request.SiteID)
 	if err != nil {
 		c.Data["json"] = map[string]string{"error": "Failed to fetch data sources from Tableau"}
 		c.ServeJSON()

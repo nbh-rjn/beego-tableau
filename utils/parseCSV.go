@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-type FCRecords struct {
+type CSVRecords struct {
 	Id                string `csv:"Id"`
 	Datasource        string `csv:"Datasource"`
 	Host              string `csv:"Host"`
@@ -68,14 +68,14 @@ func ParseCSV(filename string) []DatasourceStruct {
 	}
 
 	// create empty array
-	var fcrecords []FCRecords
+	var fcrecords []CSVRecords
 
 	for i, record := range records {
 		if i == 0 {
 			continue
 		}
 		// store record values in elements of struct
-		fcrecord := FCRecords{
+		fcrecord := CSVRecords{
 			Id:                record[0],
 			Datasource:        record[1],
 			Host:              record[2],
@@ -104,7 +104,7 @@ func ParseCSV(filename string) []DatasourceStruct {
 // takes fcrecords which is just a single line of csv file
 // returns hierarchically arranged slice of structs
 // each struct representing one datasource
-func organizeRecords(records []FCRecords) []DatasourceStruct {
+func organizeRecords(records []CSVRecords) []DatasourceStruct {
 
 	var datasources []DatasourceStruct
 	ds_idx, tb_idx := "", ""
