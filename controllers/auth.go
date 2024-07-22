@@ -5,6 +5,8 @@ import (
 	"beego-project/models"
 	"beego-project/utils"
 
+	"github.com/beego/beego/orm"
+
 	//"fmt"
 
 	"net/http"
@@ -67,6 +69,15 @@ func (c *TableauController) PostAuth() {
 
 	// save session token
 	models.SaveToken(credentialsToken)
+
+	// save credentials in db
+	o := orm.NewOrm()
+	credentials := models.CredentialsTable{
+		PATName:   requestBody.PersonalAccessTokenName,
+		PATSecret: requestBody.PersonalAccessTokenSecret,
+		SiteID:    requestBody.ContentUrl,
+	}
+	o.Insert(&credentials)
 
 	// Return response data
 	c.Data["json"] = map[string]interface{}{"credentialsToken": credentialsToken}

@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func TableauSyncRecords(filenameCSV string, siteID string) error {
+func TableauCreateDatasources(filenameCSV string, siteID string, createAssets bool) error {
 
 	// parse CSV to slice of structs
 	datasourceRecords := ParseCSV(filenameCSV)
@@ -33,5 +33,9 @@ func TableauSyncRecords(filenameCSV string, siteID string) error {
 		}
 
 	}
+	return nil
+}
+
+func UpdateDataLabels(filenameCSV string, siteID string, createAssets bool) error {
 	return nil
 }

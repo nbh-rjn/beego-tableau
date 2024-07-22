@@ -19,11 +19,20 @@ func (c *TableauController) PostSync() {
 	}
 
 	// synchronize records
-	if err := utils.TableauSyncRecords(requestBody.Filename, requestBody.SiteID); err != nil {
-		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
-		c.Data["json"] = map[string]string{"error": err.Error()}
-		c.ServeJSON()
-		return
+	if requestBody.CreateNewAssets {
+		if err := utils.TableauCreateDatasources(requestBody.Filename, requestBody.SiteID, requestBody.CreateNewAssets); err != nil {
+			c.Ctx.Output.SetStatus(http.StatusInternalServerError)
+			c.Data["json"] = map[string]string{"error": err.Error()}
+			c.ServeJSON()
+			return
+		}
+	} else {
+		if err := utils.UpdateDataLabels(requestBody.Filename, requestBody.SiteID, requestBody.CreateNewAssets); err != nil {
+			c.Ctx.Output.SetStatus(http.StatusInternalServerError)
+			c.Data["json"] = map[string]string{"error": err.Error()}
+			c.ServeJSON()
+			return
+		}
 	}
 
 	// success message
