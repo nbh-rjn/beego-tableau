@@ -28,7 +28,7 @@ func (c *TableauController) PostSync() {
 
 	// success message
 	c.Ctx.Output.SetStatus(http.StatusOK)
-	c.Data["json"] = map[string]string{"Success": "Records sync-ed successfully"}
+	c.Data["json"] = map[string]string{"success": "Records sync-ed successfully"}
 	c.ServeJSON()
 
 }

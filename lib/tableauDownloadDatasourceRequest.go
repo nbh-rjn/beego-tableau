@@ -9,14 +9,14 @@ import (
 	"strings"
 )
 
-func TableauDownloadDataSource(token string, siteID string, datasourceID string, filePath string) error {
+func TableauDownloadDataSource(siteID string, datasourceID string, filePath string) error {
 	url := models.TableauURL() + "sites/" + siteID + "/datasources/" + datasourceID + "/content"
 
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
 	}
-	request.Header.Set("X-Tableau-Auth", token)
+	request.Header.Set("X-Tableau-Auth", models.Get_token())
 
 	client := &http.Client{}
 	response, err := client.Do(request)

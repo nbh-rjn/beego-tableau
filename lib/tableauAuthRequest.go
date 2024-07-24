@@ -6,12 +6,12 @@ import (
 	"net/http"
 )
 
-func TableauAuthRequest(xmlData string) (*http.Response, error) {
+func TableauAuthRequest(payload string) (*http.Response, error) {
 
 	url := models.TableauURL() + "auth/signin"
 
 	// new post request
-	request, err := http.NewRequest("POST", url, bytes.NewBufferString(xmlData))
+	request, err := http.NewRequest("POST", url, bytes.NewBufferString(payload))
 	if err != nil {
 		return nil, err
 	}

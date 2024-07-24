@@ -49,7 +49,7 @@ func (c *TableauController) PostAuth() {
 	models.SaveToken(credentialsToken)
 	models.SaveCredentialsDB(requestBody)
 
-	fmt.Println(lib.GetAssetID("table", "AdventureWorks", "SalesOrderDetail", ""))
+	fmt.Println(lib.GetTableID("AdventureWorks", "SalesOrderDetail"))
 	//fmt.Println(lib.GetAssetID("column", "AdventureWorks", "SalesOrderDetail", "ProductID"))
 	fmt.Println(lib.GetColumns("AdventureWorks", "SalesOrderDetail"))
 

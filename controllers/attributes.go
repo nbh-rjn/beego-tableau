@@ -24,6 +24,11 @@ func (c *TableauController) GetAttribute() {
 	// using tableau REST API
 	response, err := lib.TableauGetAttribute(param, requestBody.SiteID)
 	if err != nil {
+		HandleError(c, http.StatusInternalServerError, err.Error())
+	}
+	defer response.Body.Close()
+
+	if err != nil {
 		HandleError(c, http.StatusInternalServerError, "Failed to fetch data sources from Tableau")
 	}
 

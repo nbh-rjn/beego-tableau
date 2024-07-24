@@ -20,15 +20,15 @@ func TableauCreateDatasources(filenameCSV string, siteID string, createAssets bo
 	for _, datasourceRecord := range datasourceRecords {
 
 		// tds filename
-		filepathTDS := fmt.Sprintf("%s-%s.tds", datasourceRecord.Datasource, siteID)
+		fileNameTDS := fmt.Sprintf("%s-%s.tds", datasourceRecord.Datasource, siteID)
 
 		// generate tds file for each datasource struct
-		if err := GenerateTDSFile(filepathTDS, datasourceRecords); err != nil {
+		if err := GenerateTDSFile(fileNameTDS, datasourceRecords); err != nil {
 			return err
 		}
 
 		// publish it
-		if err := lib.PublishDatasource(filepathTDS, siteID, datasourceRecord.Datasource); err != nil {
+		if err := lib.PublishDatasource(fileNameTDS, siteID, datasourceRecord.Datasource); err != nil {
 			return err
 		}
 
@@ -61,7 +61,7 @@ func UpdateDataLabels(filenameCSV string, siteID string, createAssets bool) erro
 			// use this if labels need to be applied on TABLES
 
 			// fetch table id from graphql
-			tableID, err := lib.GetAssetID("table", databaseName, table.TableName, "")
+			tableID, err := lib.GetTableID(databaseName, table.TableName)
 			if err != nil {
 				return err
 			}

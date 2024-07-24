@@ -7,7 +7,7 @@ import (
 	"io"
 )
 
-func GetAssetID(assetType string, databaseName string, tableName string, columnName string) (string, error) {
+func GetTableID(databaseName string, tableName string) (string, error) {
 	payload := fmt.Sprintf(`
 				{
 					"query": "query tableQuery{\n    databases (filter: { name: \"%s\"}) {\n        tables (filter: { name: \"%s\"}){\n            luid\n        }\n    }\n}",
@@ -86,16 +86,16 @@ func CreateLabelValue(siteID string, label string, category string) error {
 	return nil
 }
 
-func ApplyLabelValue(siteID string, asset string, columnID string, label string) error {
+func ApplyLabelValue(siteID string, assetType string, assetID string, label string) error {
 	// XML payload for applying label value
 	payload := fmt.Sprintf(`
 		<tsRequest>
 		  <contentList>
-		    <content contentType="column" id="%s" />
+		    <content contentType="%s" id="%s" />
 		  </contentList>
 		  <label
 		      value="%s"/>
-		</tsRequest>`, columnID, label)
+		</tsRequest>`, assetType, assetID, label)
 
 	// API endpoint
 	url := models.TableauURL() + "sites/" + siteID + "/labels"

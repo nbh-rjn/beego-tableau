@@ -7,16 +7,14 @@ import (
 )
 
 func TableauGetAttribute(param string, site_id string) (*http.Response, error) {
-	var attribute string
+	attributeMap := map[string]string{
+		"datalabels":  "/labelValues",
+		"datasources": "/datasources",
+		"projects":    "/projects",
+	}
 
-	switch param {
-	case "datalabels":
-		attribute = "/labelValues"
-	case "datasources":
-		attribute = "/datasources"
-	case "projects":
-		attribute = "/projects"
-	default:
+	attribute, found := attributeMap[param]
+	if !found {
 		return nil, fmt.Errorf("invalid attribute")
 	}
 
