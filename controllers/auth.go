@@ -4,10 +4,7 @@ import (
 	"beego-project/lib"
 	"beego-project/models"
 	"beego-project/utils"
-
-	"github.com/beego/beego/orm"
-
-	//"fmt"
+	"fmt"
 
 	"net/http"
 
@@ -22,17 +19,13 @@ func (c *TableauController) PostAuth() {
 	// no .tpl to render
 	c.EnableRender = false
 
+	// read request body
 	var requestBody models.CredentialStruct
-
-	// read auth request
 	if err := c.BindJSON(&requestBody); err != nil {
-		c.Ctx.Output.SetStatus(http.StatusBadRequest)
-		c.Data["json"] = map[string]string{"error": "Invalid JSON format in request"}
-		c.ServeJSON()
-		return
+		HandleError(c, http.StatusBadRequest, "Invalid JSON format in request")
 	}
 
-	//  make XML for request to tableau
+	//  construct XML request to tableau
 	xmlData := utils.CredentialsXML(
 		requestBody.PersonalAccessTokenName,
 		requestBody.PersonalAccessTokenSecret,
@@ -42,55 +35,23 @@ func (c *TableauController) PostAuth() {
 	// send request to tableau api
 	response, err := lib.TableauAuthRequest(xmlData)
 	if err != nil {
-		c.Ctx.Output.SetStatus(http.StatusBadRequest)
-		c.Data["json"] = map[string]string{"error": err.Error()}
-		c.ServeJSON()
-		return
+		HandleError(c, http.StatusBadRequest, err.Error())
 	}
-
 	defer response.Body.Close()
-
-	//  error in the response from tableau
-	if response.StatusCode != http.StatusOK {
-		c.Ctx.Output.SetStatus(http.StatusServiceUnavailable)
-		c.Data["json"] = map[string]string{"error": "Tableau response error"}
-		c.ServeJSON()
-		return
-	}
 
 	// extract token from response
 	credentialsToken, err := utils.ExtractToken(response)
 	if err != nil {
-		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
-		c.Data["json"] = map[string]string{"error": "Failed to extract credentials from Tableau response"}
-		c.ServeJSON()
-		return
+		HandleError(c, http.StatusServiceUnavailable, "Failed to extract credentials from Tableau response")
 	}
 
 	// save session token
 	models.SaveToken(credentialsToken)
+	models.SaveCredentialsDB(requestBody)
 
-	// save credentials in db
-	o := orm.NewOrm()
-	credentials := models.CredentialsTable{
-		PATName:   requestBody.PersonalAccessTokenName,
-		PATSecret: requestBody.PersonalAccessTokenSecret,
-		SiteID:    requestBody.ContentUrl,
-	}
-	o.Insert(&credentials)
-
-	// dont mind this, just debugging
-	/*
-		colID, _ := lib.GetColumnID("AdventureWorks", "SalesOrderDetail", "ProductID")
-		tableID, _ := lib.GetTableID("AdventureWorks", "SalesOrderDetail")
-
-		fmt.Println(lib.CreateCategory("testcategory"))
-		fmt.Println(lib.CreateLabelValue("testlabel", "testcategory"))
-		fmt.Println(lib.CreateLabelValue("testcategory", "testcategory"))
-
-		fmt.Println(lib.ApplyLabelValue("table", tableID, "testcategory"))
-		fmt.Println(lib.ApplyLabelValue("column", colID, "testlabel"))
-	*/
+	fmt.Println(lib.GetAssetID("table", "AdventureWorks", "SalesOrderDetail", ""))
+	//fmt.Println(lib.GetAssetID("column", "AdventureWorks", "SalesOrderDetail", "ProductID"))
+	fmt.Println(lib.GetColumns("AdventureWorks", "SalesOrderDetail"))
 
 	// Return response data
 	c.Data["json"] = map[string]interface{}{"credentialsToken": credentialsToken}

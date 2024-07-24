@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-
-	"github.com/beego/beego/orm"
 )
 
 func (c *TableauController) GetAttribute() {
@@ -20,63 +18,24 @@ func (c *TableauController) GetAttribute() {
 
 	// dont use c.bindjson
 	if err := json.Unmarshal((c.Ctx.Input.CopyBody(1000)), &requestBody); err != nil {
-		c.Ctx.Output.SetStatus(http.StatusBadRequest)
-		c.Data["json"] = map[string]string{"error": "Invalid JSON format in request"}
-		c.ServeJSON()
-		return
+		HandleError(c, http.StatusBadRequest, "Invalid JSON format in request")
 	}
 
 	// using tableau REST API
 	response, err := lib.TableauGetAttribute(param, requestBody.SiteID)
 	if err != nil {
-		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
-		c.Data["json"] = map[string]string{"error": "Failed to fetch data sources from Tableau"}
-		c.ServeJSON()
-		return
+		HandleError(c, http.StatusInternalServerError, "Failed to fetch data sources from Tableau")
 	}
 
 	// extrect details out of response from Tableau
 	attributes, err = utils.ExtractAttributes(response, param)
 	if err != nil {
-		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
-		c.Data["json"] = map[string]string{"error": "Failed to extract attribute from Tableau response"}
-		c.ServeJSON()
-		return
+		HandleError(c, http.StatusInternalServerError, "Failed to extract attribute from Tableau response")
 	}
 
-	o := orm.NewOrm()
+	// save attributes to database
+	models.SaveAttributesDB(param, requestBody.SiteID, attributes)
 
-	for _, attribute := range attributes {
-		name := string(attribute["name"].(string))
-
-		switch param {
-		case "datalabels":
-			label := models.LabelsTable{
-				LabelName: name,
-				SiteID:    requestBody.SiteID,
-			}
-			o.Insert(&label)
-		case "datasources":
-			datasource := models.DatasourcesTable{
-				DatasourceName: name,
-				SiteID:         requestBody.SiteID,
-			}
-			o.Insert(&datasource)
-		case "projects":
-			project := models.ProjectsTable{
-				ProjectName: name,
-				SiteID:      requestBody.SiteID,
-			}
-			o.Insert(&project)
-		default:
-			c.Ctx.Output.SetStatus(http.StatusBadRequest)
-			c.Data["json"] = map[string]string{"error": "Invalid attribute type"}
-			c.ServeJSON()
-			return
-		}
-	}
-
-	// return JSON
 	c.Data["json"] = map[string]interface{}{
 		param: attributes,
 	}

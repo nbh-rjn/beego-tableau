@@ -9,7 +9,7 @@ import (
 
 func TableauCreateDatasources(filenameCSV string, siteID string, createAssets bool) error {
 
-	// parse CSV to slice of structs
+	// parse CSV to slice of struct
 	datasourceRecords := ParseCSV(filenameCSV)
 	if datasourceRecords == nil {
 		return errors.New("Could not parse raw CSV file")
@@ -55,38 +55,38 @@ func UpdateDataLabels(filenameCSV string, siteID string, createAssets bool) erro
 
 			//create category acc to datasourceRecord.table.contentprofile
 			if table.ContentProfiles != "" {
-				lib.CreateCategory(table.ContentProfiles)
+				lib.CreateCategory(siteID, table.ContentProfiles)
 			}
 
 			// use this if labels need to be applied on TABLES
-			/*
-				// fetch table id from graphql
-				tableID, err := lib.GetTableID(databaseName, table.TableName)
-				if err != nil {
-					return err
-				}
 
-				// create label value to apply on table ? if needed
-				lib.CreateLabelValue(table.ContentProfiles, table.ContentProfiles)
-				lib.ApplyLabelValue("table", tableID, table.ContentProfiles)
-			*/
+			// fetch table id from graphql
+			tableID, err := lib.GetAssetID("table", databaseName, table.TableName, "")
+			if err != nil {
+				return err
+			}
+
+			// create label value to apply on table ? if needed
+			lib.CreateLabelValue(siteID, table.ContentProfiles, table.ContentProfiles)
+			lib.ApplyLabelValue(siteID, "table", tableID, table.ContentProfiles)
 
 			// for column in column
+			columnIDs, err := lib.GetColumns(databaseName, table.TableName)
+			if err != nil {
+				return err
+			}
 			for _, column := range table.Columns {
 
 				// fetch column id from graphql
-				columnID, err := lib.GetColumnID(databaseName, table.TableName, column.ColumnName)
-				if err != nil {
-					return err
-				}
+				columnID := columnIDs[column.ColumnName]
 
 				// create labelvalue acc to datasourceRecord.table.column.DataElements
-				if err := lib.CreateLabelValue(column.DataElements, table.ContentProfiles); err != nil {
+				if err := lib.CreateLabelValue(siteID, column.DataElements, table.ContentProfiles); err != nil {
 					return err
 				}
 
 				//apply on columns
-				if err := lib.ApplyLabelValue("column", columnID, column.DataElements); err != nil {
+				if err := lib.ApplyLabelValue(siteID, "column", columnID, column.DataElements); err != nil {
 					return err
 				}
 			}

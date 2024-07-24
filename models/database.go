@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/beego/beego/orm"
 )
 
@@ -34,4 +36,54 @@ func init() {
 	orm.RegisterModel(new(CredentialsTable))
 	orm.RegisterModel(new(ProjectsTable))
 	orm.RegisterModel(new(DatasourcesTable))
+}
+
+func SaveCredentialsDB(credentials CredentialStruct) {
+	// save credentials in db
+	o := orm.NewOrm()
+
+	c := CredentialsTable{
+		PATName:   credentials.PersonalAccessTokenName,
+		PATSecret: credentials.PersonalAccessTokenSecret,
+		SiteID:    credentials.ContentUrl,
+	}
+
+	o.Insert(&c)
+
+}
+
+func SaveAttributesDB(param string, siteID string, attributes []map[string]interface{}) error {
+
+	o := orm.NewOrm()
+
+	for _, attribute := range attributes {
+		name := string(attribute["name"].(string))
+
+		switch param {
+		case "datalabels":
+			label := LabelsTable{
+				LabelName: name,
+				SiteID:    siteID,
+			}
+			o.Insert(&label)
+
+		case "datasources":
+			datasource := DatasourcesTable{
+				DatasourceName: name,
+				SiteID:         siteID,
+			}
+			o.Insert(&datasource)
+
+		case "projects":
+			project := ProjectsTable{
+				ProjectName: name,
+				SiteID:      siteID,
+			}
+			o.Insert(&project)
+
+		default:
+			return fmt.Errorf("invalid attribute type")
+		}
+	}
+	return nil
 }

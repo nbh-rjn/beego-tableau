@@ -251,3 +251,23 @@ type DatasourceStruct struct {
 	DBType     string
 	Tables     []TableStruct
 }
+
+// graphql
+
+type TableResponse struct {
+	Data struct {
+		Databases []struct {
+			Tables []struct {
+				LUID string `json:"luid"`
+				// If you need `name` for tables, include it here
+				// Name string `json:"name"`
+				Columns []struct {
+					LUID string `json:"luid"`
+					Name string `json:"name"`
+					// If you need `name` for columns, include it here
+					// Name string `json:"name"`
+				} `json:"columns,omitempty"`
+			} `json:"tables"`
+		} `json:"databases"`
+	} `json:"data"`
+}

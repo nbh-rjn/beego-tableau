@@ -7,6 +7,7 @@ import (
 )
 
 func TableauAuthRequest(xmlData string) (*http.Response, error) {
+
 	url := models.TableauURL() + "auth/signin"
 
 	// new post request

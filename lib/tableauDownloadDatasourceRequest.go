@@ -3,7 +3,6 @@ package lib
 import (
 	"archive/zip"
 	"beego-project/models"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -53,7 +52,6 @@ func TableauDownloadDataSource(token string, siteID string, datasourceID string,
 	}
 
 	if tdsFile == nil {
-		fmt.Println("4")
 		return err
 	}
 

@@ -12,26 +12,17 @@ func (c *TableauController) PostSync() {
 	// parse request to struct
 	var requestBody models.SyncRequest
 	if err := c.BindJSON(&requestBody); err != nil {
-		c.Ctx.Output.SetStatus(http.StatusBadRequest)
-		c.Data["json"] = map[string]string{"error": "Invalid JSON format in request"}
-		c.ServeJSON()
-		return
+		HandleError(c, http.StatusBadRequest, "Invalid JSON format in request")
 	}
 
 	// synchronize records
 	if requestBody.CreateNewAssets {
 		if err := utils.TableauCreateDatasources(requestBody.Filename, requestBody.SiteID, requestBody.CreateNewAssets); err != nil {
-			c.Ctx.Output.SetStatus(http.StatusInternalServerError)
-			c.Data["json"] = map[string]string{"error": err.Error()}
-			c.ServeJSON()
-			return
+			HandleError(c, http.StatusInternalServerError, err.Error())
 		}
 	} else {
 		if err := utils.UpdateDataLabels(requestBody.Filename, requestBody.SiteID, requestBody.CreateNewAssets); err != nil {
-			c.Ctx.Output.SetStatus(http.StatusInternalServerError)
-			c.Data["json"] = map[string]string{"error": err.Error()}
-			c.ServeJSON()
-			return
+			HandleError(c, http.StatusInternalServerError, err.Error())
 		}
 	}
 

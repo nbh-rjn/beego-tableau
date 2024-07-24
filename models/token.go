@@ -13,5 +13,5 @@ func Get_token() string {
 }
 
 func TableauURL() string {
-	return "https://10ax.online.tableau.com/api/3.20/"
+	return "https://10ax.online.tableau.com/api/3.21/"
 }

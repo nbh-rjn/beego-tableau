@@ -97,6 +97,7 @@ func ExtractToken(response *http.Response) (string, error) {
 
 // construct xml request to tableau api
 // using the info from the request to beego
+
 func CredentialsXML(PersonalAccessTokenName string, PersonalAccessTokenSecret string, ContentUrl string) string {
 	xml := fmt.Sprintf(
 		`<tsRequest>
