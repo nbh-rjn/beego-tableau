@@ -30,6 +30,15 @@ func GenerateTDSFile(filenameTDS string, datasources []models.DatasourceStruct) 
 	return nil
 }
 func generateTDSBody(formattedName string, inline bool, sourcePlatform string, version string, xmlBase string, xmlnsUser string, datasource models.DatasourceStruct) ([]byte, error) {
+	TableauMetadataRecords, err := getMetadataRecords(datasource)
+	if err != nil {
+		return nil, err
+	}
+
+	columns, err := getColumns(datasource)
+	if err != nil {
+		return nil, err
+	}
 	ds := models.DatasourceGeneration{
 		FormattedName:  formattedName,
 		Inline:         inline,
@@ -49,13 +58,13 @@ func generateTDSBody(formattedName string, inline bool, sourcePlatform string, v
 			Server:    datasource.DBType,
 			Relations: getRelations(datasource),
 			MetadataRecords: models.MetadataRecords{
-				Records: getMetadataRecords(datasource),
+				Records: TableauMetadataRecords,
 			},
 		},
 		Aliases: models.Aliases{
 			Enabled: "yes",
 		},
-		Columns: getColumns(datasource),
+		Columns: columns,
 	}
 
 	xmlData, err := xml.MarshalIndent(ds, "", "\t")
@@ -81,40 +90,48 @@ func getRelations(datasource models.DatasourceStruct) []models.Relation {
 	return relations
 }
 
-func getMetadataRecords(datasource models.DatasourceStruct) []models.MetadataRecord {
+func getMetadataRecords(datasource models.DatasourceStruct) ([]models.MetadataRecord, error) {
 
 	var metadatarecords []models.MetadataRecord
 
 	for _, table := range datasource.Tables {
 		for _, column := range table.Columns {
+			TableauLocalType, err := standardiseDatatypes(column.ColumnType)
+			if err != nil {
+				return nil, err
+			}
 			metadatarecord := models.MetadataRecord{
 				Class:        "column",
 				RemoteName:   fmt.Sprintf("%s.%s", table.TableName, column.ColumnName),   //
-				RemoteType:   3,                                                          // idk what this value is yet so i will leave it hardcoded like the example for now
+				RemoteType:   3,                                                          // assuming
 				LocalName:    fmt.Sprintf("[%s.%s]", table.TableName, column.ColumnName), //
 				ParentName:   fmt.Sprintf("[%s]", table.TableName),
-				LocalType:    standardiseDatatypes(column.ColumnType),
+				LocalType:    TableauLocalType,
 				ContainsNull: true,                                                     // assuming, since no nullflag in csv
 				RemoteAlias:  fmt.Sprintf("%s.%s", table.TableName, column.ColumnName), //
-				Ordinal:      6,                                                        // idk what this value is yet so i will leave it hardcoded like the example for now
+				Ordinal:      6,                                                        // assuming
 			}
 			metadatarecords = append(metadatarecords, metadatarecord)
 		}
 	}
 
-	return metadatarecords
+	return metadatarecords, nil
 
 }
 
-func getColumns(datasource models.DatasourceStruct) []models.Column {
+func getColumns(datasource models.DatasourceStruct) ([]models.Column, error) {
 	var columns []models.Column
 
 	for _, table := range datasource.Tables {
 		for _, column := range table.Columns {
+			TableauDataType, err := standardiseDatatypes(column.ColumnType)
+			if err != nil {
+				return nil, err
+			}
 			col := models.Column{
-				Caption:  fmt.Sprintf("%s.%s", table.TableName, column.ColumnName),   //
-				Datatype: standardiseDatatypes(column.ColumnType),                    //"integer",
-				Name:     fmt.Sprintf("[%s.%s]", table.TableName, column.ColumnName), //
+				Caption:  fmt.Sprintf("%s.%s", table.TableName, column.ColumnName),
+				Datatype: TableauDataType,
+				Name:     fmt.Sprintf("[%s.%s]", table.TableName, column.ColumnName),
 				Role:     "dimension",
 				Type:     "nominal",
 			}
@@ -122,10 +139,10 @@ func getColumns(datasource models.DatasourceStruct) []models.Column {
 			columns = append(columns, col)
 		}
 	}
-	return columns
+	return columns, nil
 }
 
-func standardiseDatatypes(columnType string) string {
+func standardiseDatatypes(columnType string) (string, error) {
 	typeMaps := map[string][]string{
 		"string":   {"char", "varchar", "text", "character varying", "character", "uuid", "nvarchar2", "nchar", "string", "national character varying", "national character", "character large object", "clob", "long", "long text", "mediumtext", "tinytext", "long varchar", "longnvarchar", "uniqueidentifier", "nstring", "nvarchar", "longnvarchar", "nchar varying", "nclob", "ntext", "json", "jsonb", "xml", "varchar(max)", "nvarchar(max)", "mpaa_rating"},
 		"real":     {"decimal", "numeric", "float", "double", "real", "money", "smallmoney"},
@@ -136,10 +153,10 @@ func standardiseDatatypes(columnType string) string {
 	}
 	for TableauType, datatypes := range typeMaps {
 		if Contains(datatypes, strings.ToLower(columnType)) {
-			return TableauType
+			return TableauType, nil
 		}
 	}
-	return "N/A"
+	return "", fmt.Errorf("could not convert to Tableau-compatible data type")
 }
 
 func Contains(slice []string, element string) bool {

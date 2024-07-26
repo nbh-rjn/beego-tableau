@@ -10,6 +10,7 @@ import (
 func CreateDatasources(datasourceRecords []models.DatasourceStruct, siteID string, projectID string) ([]string, error) {
 
 	var datasourceIDs []string
+	var errorMsg error = nil
 
 	// can handle more than one datasource per CSV file
 	for _, datasourceRecord := range datasourceRecords {
@@ -19,18 +20,20 @@ func CreateDatasources(datasourceRecords []models.DatasourceStruct, siteID strin
 
 		// generate tds file for each datasource struct
 		if err := GenerateTDSFile(fileNameTDS, datasourceRecords); err != nil {
-			return nil, err
+			errorMsg = err
+			continue
 		}
 
 		// publish it
 		datasourceID, err := lib.PublishDatasource(fileNameTDS, siteID, datasourceRecord.Datasource, projectID)
 		if err != nil {
-			return nil, err
+			errorMsg = err
+			continue
 		}
 		datasourceIDs = append(datasourceIDs, datasourceID)
 
 	}
-	return datasourceIDs, nil
+	return datasourceIDs, errorMsg
 }
 
 // ** return [] label ids

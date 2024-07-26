@@ -8,13 +8,12 @@ import (
 )
 
 // ** return err too
-func ParseCSV(filename string) []models.DatasourceStruct {
+func ParseCSV(filename string) ([]models.DatasourceStruct, error) {
 
 	// open file
 	file, err := os.Open(filename)
 	if err != nil {
-		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 	defer file.Close()
 
@@ -22,8 +21,7 @@ func ParseCSV(filename string) []models.DatasourceStruct {
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil {
-		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 
 	// create empty array
@@ -56,6 +54,10 @@ func ParseCSV(filename string) []models.DatasourceStruct {
 		fcrecords = append(fcrecords, fcrecord)
 	}
 
+	if len(fcrecords) < 1 {
+		return nil, fmt.Errorf("no records to parse in CSV")
+	}
+
 	// return parsed array
 	return organizeRecords(fcrecords)
 }
@@ -63,11 +65,15 @@ func ParseCSV(filename string) []models.DatasourceStruct {
 // takes fcrecords which is just a single line of csv file
 // returns hierarchically arranged slice of structs
 // each struct representing one datasource
-func organizeRecords(records []models.CSVRecords) []models.DatasourceStruct {
+func organizeRecords(records []models.CSVRecords) ([]models.DatasourceStruct, error) {
 
 	var datasources []models.DatasourceStruct
 	ds_idx, tb_idx := "", ""
 	dsi, tbi := -1, -1
+
+	if len(records) < 1 {
+		return nil, fmt.Errorf("no records obtained from CSV to organize")
+	}
 
 	for _, record := range records {
 
@@ -110,6 +116,6 @@ func organizeRecords(records []models.CSVRecords) []models.DatasourceStruct {
 		}
 	}
 
-	return datasources
+	return datasources, nil
 
 }

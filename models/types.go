@@ -240,10 +240,9 @@ type ColumnStruct struct {
 }
 
 type TableStruct struct {
-	Id        string
-	TableName string
-	TableType string
-	// add db and schema
+	Id              string
+	TableName       string
+	TableType       string
 	ContentProfiles string
 	Columns         []ColumnStruct
 }

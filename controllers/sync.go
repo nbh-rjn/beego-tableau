@@ -16,9 +16,9 @@ func (c *TableauController) PostSync() {
 		HandleError(c, http.StatusBadRequest, "Invalid JSON format in request")
 	}
 
-	datasourceRecords := utils.ParseCSV(requestBody.Filename)
-	if datasourceRecords == nil {
-		HandleError(c, http.StatusInternalServerError, "Could not parse raw CSV file")
+	datasourceRecords, err := utils.ParseCSV(requestBody.Filename)
+	if err != nil {
+		HandleError(c, http.StatusInternalServerError, err.Error())
 	}
 
 	if requestBody.CreateNewAssets {
