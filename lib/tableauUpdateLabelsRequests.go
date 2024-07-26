@@ -8,6 +8,7 @@ import (
 )
 
 func GetTableID(databaseName string, tableName string) (string, error) {
+
 	payload := fmt.Sprintf(`
 				{
 					"query": "query tableQuery{\n    databases (filter: { name: \"%s\"}) {\n        tables (filter: { name: \"%s\"}){\n            luid\n        }\n    }\n}",
@@ -42,10 +43,11 @@ func GetTableID(databaseName string, tableName string) (string, error) {
 
 }
 
-func CreateCategory(siteID string, category string) error {
+// ** return category id
+func CreateCategory(category string) error {
 
 	// need to use api v3.21; others dont work
-	url := models.TableauURL() + "sites/" + siteID + "/labelCategories"
+	url := models.TableauURL() + "sites/" + models.Get_siteID() + "/labelCategories"
 
 	// request body
 	payload := fmt.Sprintf(
@@ -64,7 +66,8 @@ func CreateCategory(siteID string, category string) error {
 	return nil
 }
 
-func CreateLabelValue(siteID string, label string, category string) error {
+// ** return label id
+func TableauLabelAsset(label string, category string, assetType string, assetID string) error {
 	// XML payload for creating label value
 	payload := fmt.Sprintf(`
 		<tsRequest>
@@ -74,10 +77,31 @@ func CreateLabelValue(siteID string, label string, category string) error {
 		</tsRequest>`, label, category)
 
 	// need v3.21
-	url := models.TableauURL() + "sites/" + siteID + "/labelValues"
+	url := models.TableauURL() + "sites/" + models.Get_siteID() + "/labelValues"
 
 	// new put request
 	response, err := MakeRequest(url, payload, "PUT", "xml")
+	if err != nil {
+		return err
+	}
+
+	response.Body.Close()
+
+	// XML payload for applying label value
+	payload = fmt.Sprintf(`
+		<tsRequest>
+		  <contentList>
+		    <content contentType="%s" id="%s" />
+		  </contentList>
+		  <label
+		      value="%s"/>
+		</tsRequest>`, assetType, assetID, label)
+
+	// API endpoint
+	url = models.TableauURL() + "sites/" + models.Get_siteID() + "/labels"
+
+	// Create PUT request
+	response, err = MakeRequest(url, payload, "PUT", "xml")
 	if err != nil {
 		return err
 	}
@@ -86,6 +110,8 @@ func CreateLabelValue(siteID string, label string, category string) error {
 	return nil
 }
 
+// ** return
+/*
 func ApplyLabelValue(siteID string, assetType string, assetID string, label string) error {
 	// XML payload for applying label value
 	payload := fmt.Sprintf(`
@@ -98,7 +124,7 @@ func ApplyLabelValue(siteID string, assetType string, assetID string, label stri
 		</tsRequest>`, assetType, assetID, label)
 
 	// API endpoint
-	url := models.TableauURL() + "sites/" + siteID + "/labels"
+	url := models.TableauURL() + "sites/" + models.Get_siteID() + "/labels"
 
 	// Create PUT request
 	response, err := MakeRequest(url, payload, "PUT", "xml")
@@ -109,7 +135,7 @@ func ApplyLabelValue(siteID string, assetType string, assetID string, label stri
 
 	return nil
 }
-
+*/
 func GetColumns(databaseName string, tableName string) (map[string]string, error) {
 	payload := fmt.Sprintf(`
 		{

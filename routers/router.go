@@ -6,6 +6,7 @@ import (
 	beego "github.com/beego/beego/v2/server/web"
 )
 
+// fetch site ID from database
 func init() {
 	beego.Router("/", &controllers.TableauController{})
 
@@ -14,5 +15,6 @@ func init() {
 	beego.Router("/download", &controllers.TableauController{}, "get:DownloadDataSource")
 
 	// fetching projects, datasources, datalabels, etc . . .
+	//
 	beego.Router("/attribute/:param", &controllers.TableauController{}, "get:GetAttribute")
 }

@@ -7,7 +7,6 @@ require github.com/beego/beego/v2 v2.2.2
 require (
 	github.com/beego/beego v1.12.12
 	github.com/lib/pq v1.10.9
-	github.com/pkg/errors v0.9.1
 	github.com/smartystreets/goconvey v1.6.4
 )
 
@@ -19,6 +18,7 @@ require (
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.19.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect

@@ -9,6 +9,11 @@ type CredentialStruct struct {
 	ContentUrl                string `json:"contentUrl"`
 }
 
+// tableau response body
+type TSResponse struct {
+	XMLName xml.Name `xml:"tsResponse"`
+}
+
 // auth resp from tableau
 type AuthResponse struct {
 	TSResponse
@@ -20,6 +25,11 @@ type Credentials struct {
 	EstimatedTimeToExpiration string `xml:"estimatedTimeToExpiration,attr"`
 	Site                      Site   `xml:"site"`
 	User                      User   `xml:"user"`
+}
+
+type PublishDSResponse struct {
+	TSResponse
+	Datasource DatasourceElement `xml:"datasource"`
 }
 
 type Site struct {
@@ -42,6 +52,7 @@ type InstanceMap map[string]string
 type SyncRequest struct {
 	Filename        string       `json:"filename"`
 	SiteID          string       `json:"siteID"`
+	ProjectID       string       `json:"projectID"`
 	CreateNewAssets bool         `json:"create_new_assets"`
 	EntityType      string       `json:"entity_type"`
 	AttributeMap    AttributeMap `json:"attribute_map"`
@@ -57,11 +68,6 @@ type SiteRequest struct {
 type DownloadRequest struct {
 	SiteRequest
 	DatasourceID string `json:"datasourceID"`
-}
-
-// tableau response body
-type TSResponse struct {
-	XMLName xml.Name `xml:"tsResponse"`
 }
 
 // label attributes
@@ -234,9 +240,10 @@ type ColumnStruct struct {
 }
 
 type TableStruct struct {
-	Id              string
-	TableName       string
-	TableType       string
+	Id        string
+	TableName string
+	TableType string
+	// add db and schema
 	ContentProfiles string
 	Columns         []ColumnStruct
 }
@@ -245,8 +252,8 @@ type DatasourceStruct struct {
 	Datasource string
 	Host       string
 	Port       string
-	Database   string
-	Schema     string
+	Database   string // put in table struct
+	Schema     string // put in table struct
 	DBUsername string
 	DBType     string
 	Tables     []TableStruct
@@ -258,14 +265,10 @@ type TableResponse struct {
 	Data struct {
 		Databases []struct {
 			Tables []struct {
-				LUID string `json:"luid"`
-				// If you need `name` for tables, include it here
-				// Name string `json:"name"`
+				LUID    string `json:"luid"`
 				Columns []struct {
 					LUID string `json:"luid"`
 					Name string `json:"name"`
-					// If you need `name` for columns, include it here
-					// Name string `json:"name"`
 				} `json:"columns,omitempty"`
 			} `json:"tables"`
 		} `json:"databases"`

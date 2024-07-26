@@ -7,6 +7,7 @@ import (
 )
 
 func (c *TableauController) PostSync() {
+	// make catgeories here from payload
 	c.EnableRender = false
 
 	// parse request to struct
@@ -15,15 +16,25 @@ func (c *TableauController) PostSync() {
 		HandleError(c, http.StatusBadRequest, "Invalid JSON format in request")
 	}
 
-	// synchronize records
+	datasourceRecords := utils.ParseCSV(requestBody.Filename)
+	if datasourceRecords == nil {
+		HandleError(c, http.StatusInternalServerError, "Could not parse raw CSV file")
+	}
+
 	if requestBody.CreateNewAssets {
-		if err := utils.TableauCreateDatasources(requestBody.Filename, requestBody.SiteID, requestBody.CreateNewAssets); err != nil {
+		// ** handle partial data
+		// ** download existing data
+		// ** merge both to handle overwrite, then publish
+		// **** check for existing API
+		if err := utils.TableauCreateDatasources(datasourceRecords, requestBody.SiteID, requestBody.ProjectID); err != nil {
 			HandleError(c, http.StatusInternalServerError, err.Error())
 		}
-	} else {
-		if err := utils.UpdateDataLabels(requestBody.Filename, requestBody.SiteID, requestBody.CreateNewAssets); err != nil {
-			HandleError(c, http.StatusInternalServerError, err.Error())
-		}
+	}
+
+	// assets not being recognized
+
+	if err := utils.LabelAssets(datasourceRecords, requestBody.SiteID, requestBody.AttributeMap.ContentProfile, requestBody.AttributeMap.DataElements); err != nil {
+		HandleError(c, http.StatusInternalServerError, err.Error())
 	}
 
 	// success message

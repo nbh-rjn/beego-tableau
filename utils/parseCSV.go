@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// ** return err too
 func ParseCSV(filename string) []models.DatasourceStruct {
 
 	// open file

@@ -3,8 +3,6 @@ package controllers
 import (
 	"beego-project/lib"
 	"beego-project/models"
-	"beego-project/utils"
-	"fmt"
 
 	"net/http"
 
@@ -25,36 +23,28 @@ func (c *TableauController) PostAuth() {
 		HandleError(c, http.StatusBadRequest, "Invalid JSON format in request")
 	}
 
-	//  construct XML request to tableau
-	xmlData := utils.CredentialsXML(
-		requestBody.PersonalAccessTokenName,
-		requestBody.PersonalAccessTokenSecret,
-		requestBody.ContentUrl,
-	)
+	// get token from tableau api
+	credentialsToken, siteID, err := lib.TableauAuthRequest(requestBody.PersonalAccessTokenName, requestBody.PersonalAccessTokenSecret, requestBody.ContentUrl)
 
-	// send request to tableau api
-	response, err := lib.TableauAuthRequest(xmlData)
 	if err != nil {
 		HandleError(c, http.StatusBadRequest, err.Error())
 	}
-	defer response.Body.Close()
 
-	// extract token from response
-	credentialsToken, err := utils.ExtractToken(response)
-	if err != nil {
-		HandleError(c, http.StatusServiceUnavailable, "Failed to extract credentials from Tableau response")
-	}
+	models.SaveCredentials(credentialsToken, siteID)
+	models.SaveCredentialsDB(requestBody.PersonalAccessTokenName, requestBody.PersonalAccessTokenSecret, siteID)
 
-	// save session token
-	models.SaveToken(credentialsToken)
-	models.SaveCredentialsDB(requestBody)
+	//fmt.Println(lib.PublishDatasource("download.tds", "2ff64d57-b7c1-4e99-803c-13bb81ae0371", "testing", "f7eea7f7-2c14-4694-a6ac-27af2e0bc583"))
 
-	fmt.Println(lib.GetTableID("AdventureWorks", "SalesOrderDetail"))
-	//fmt.Println(lib.GetAssetID("column", "AdventureWorks", "SalesOrderDetail", "ProductID"))
-	fmt.Println(lib.GetColumns("AdventureWorks", "SalesOrderDetail"))
+	//lib.TableauLabelAsset("testlabel3", "testcategory", "column", "bcb81941-6bb7-4054-a323-9aa82fc7d51e")
 
+	//lib.ApplyLabelValue(models.Get_siteID(), "table", id, "label1")
+
+	//lib.TableauLabelAsset("label2", "testcategory", "table", "2d418eed-ff45-4263-b146-c7010f69d938")
+	lib.CreateCategory("testcategory")
 	// Return response data
-	c.Data["json"] = map[string]interface{}{"credentialsToken": credentialsToken}
+	c.Data["json"] = map[string]interface{}{
+		"credentialsToken": credentialsToken, "siteID": siteID,
+	}
 	c.ServeJSON()
 
 }

@@ -2,18 +2,13 @@ package utils
 
 import (
 	"beego-project/lib"
+	"beego-project/models"
 	"fmt"
-
-	"github.com/pkg/errors"
 )
 
-func TableauCreateDatasources(filenameCSV string, siteID string, createAssets bool) error {
-
-	// parse CSV to slice of struct
-	datasourceRecords := ParseCSV(filenameCSV)
-	if datasourceRecords == nil {
-		return errors.New("Could not parse raw CSV file")
-	}
+// ** return slice of datasource ids
+// rename to upload data sources??
+func TableauCreateDatasources(datasourceRecords []models.DatasourceStruct, siteID string, projectID string) error {
 
 	// one datasource at a time
 	// can handle more than one datasource per CSV file
@@ -28,7 +23,7 @@ func TableauCreateDatasources(filenameCSV string, siteID string, createAssets bo
 		}
 
 		// publish it
-		if err := lib.PublishDatasource(fileNameTDS, siteID, datasourceRecord.Datasource); err != nil {
+		if _, err := lib.PublishDatasource(fileNameTDS, siteID, datasourceRecord.Datasource, projectID); err != nil {
 			return err
 		}
 
@@ -36,14 +31,8 @@ func TableauCreateDatasources(filenameCSV string, siteID string, createAssets bo
 	return nil
 }
 
-func UpdateDataLabels(filenameCSV string, siteID string, createAssets bool) error {
-
-	// parse CSV to slice of structs
-	datasourceRecords := ParseCSV(filenameCSV)
-
-	if datasourceRecords == nil {
-		return errors.New("Could not parse raw CSV file")
-	}
+// ** return [] label ids
+func LabelAssets(datasourceRecords []models.DatasourceStruct, siteID string, tableCategory string, columnCategory string) error {
 
 	for _, datasourceRecord := range datasourceRecords {
 
@@ -53,42 +42,63 @@ func UpdateDataLabels(filenameCSV string, siteID string, createAssets bool) erro
 		// for table in tables
 		for _, table := range datasourceRecord.Tables {
 
-			//create category acc to datasourceRecord.table.contentprofile
-			if table.ContentProfiles != "" {
-				lib.CreateCategory(siteID, table.ContentProfiles)
-			}
+			// ** category as per sync req body
+			// ** remove from here
+			/*
+				if table.ContentProfiles != "" {
+					lib.CreateCategory(tableCategory)
+				}
+			*/
 
-			// use this if labels need to be applied on TABLES
+			// ** make one func to get table ID and all its columns together
 
 			// fetch table id from graphql
 			tableID, err := lib.GetTableID(databaseName, table.TableName)
+
 			if err != nil {
+
+				// ** flow must continue
+				// ** continue
+				// ** dont return err
 				return err
 			}
 
-			// create label value to apply on table ? if needed
-			lib.CreateLabelValue(siteID, table.ContentProfiles, table.ContentProfiles)
-			lib.ApplyLabelValue(siteID, "table", tableID, table.ContentProfiles)
+			// ** one func
+
+			if err := lib.TableauLabelAsset(table.ContentProfiles, tableCategory, "table", tableID); err != nil {
+
+				// ** flow must continue
+				// ** continue
+				// ** dont return err
+				return err
+			}
+			//lib.ApplyLabelValue(siteID, "table", tableID, table.ContentProfiles)
 
 			// for column in column
 			columnIDs, err := lib.GetColumns(databaseName, table.TableName)
 			if err != nil {
 				return err
+				// continue
+				// dont return
 			}
 			for _, column := range table.Columns {
 
 				// fetch column id from graphql
 				columnID := columnIDs[column.ColumnName]
 
+				// ** make one func for creating and applying labels
+
 				// create labelvalue acc to datasourceRecord.table.column.DataElements
-				if err := lib.CreateLabelValue(siteID, column.DataElements, table.ContentProfiles); err != nil {
+				if err := lib.TableauLabelAsset(column.DataElements, columnCategory, "column", columnID); err != nil {
 					return err
 				}
 
 				//apply on columns
-				if err := lib.ApplyLabelValue(siteID, "column", columnID, column.DataElements); err != nil {
-					return err
-				}
+				/*
+					if err := lib.ApplyLabelValue(siteID, "column", columnID, column.DataElements); err != nil {
+						return err
+					}
+				*/
 			}
 
 		}

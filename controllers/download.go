@@ -20,12 +20,12 @@ func (c *TableauController) DownloadDataSource() {
 	}
 
 	filePath := "storage/download.tds"
+
 	// utility function to communicate with Tableau API
-	if err := lib.TableauDownloadDataSource(request.SiteID, request.DatasourceID, filePath); err != nil {
+	if err := lib.TableauDownloadDataSource(models.Get_siteID(), request.DatasourceID, filePath); err != nil {
 		HandleError(c, http.StatusInternalServerError, "Failed to fetch data sources from Tableau")
 	}
 
-	c.Ctx.Output.SetStatus(http.StatusOK)
 	c.Ctx.Output.Header("Content-Type", "application/octet-stream")
 	c.Ctx.Output.Download(filePath)
 
