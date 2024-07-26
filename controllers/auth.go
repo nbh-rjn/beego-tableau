@@ -33,14 +33,6 @@ func (c *TableauController) PostAuth() {
 	models.SaveCredentials(credentialsToken, siteID)
 	models.SaveCredentialsDB(requestBody.PersonalAccessTokenName, requestBody.PersonalAccessTokenSecret, siteID)
 
-	//fmt.Println(lib.PublishDatasource("download.tds", "2ff64d57-b7c1-4e99-803c-13bb81ae0371", "testing", "f7eea7f7-2c14-4694-a6ac-27af2e0bc583"))
-
-	//lib.TableauLabelAsset("testlabel3", "testcategory", "column", "bcb81941-6bb7-4054-a323-9aa82fc7d51e")
-
-	//lib.ApplyLabelValue(models.Get_siteID(), "table", id, "label1")
-
-	//lib.TableauLabelAsset("label2", "testcategory", "table", "2d418eed-ff45-4263-b146-c7010f69d938")
-	lib.CreateCategory("testcategory")
 	// Return response data
 	c.Data["json"] = map[string]interface{}{
 		"credentialsToken": credentialsToken, "siteID": siteID,

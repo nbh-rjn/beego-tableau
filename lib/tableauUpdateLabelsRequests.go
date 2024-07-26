@@ -7,6 +7,7 @@ import (
 	"io"
 )
 
+/*
 func GetTableID(databaseName string, tableName string) (string, error) {
 
 	payload := fmt.Sprintf(`
@@ -42,7 +43,7 @@ func GetTableID(databaseName string, tableName string) (string, error) {
 	return responseData.Data.Databases[0].Tables[0].LUID, nil
 
 }
-
+*/
 // ** return category id
 func CreateCategory(category string) error {
 
@@ -110,33 +111,7 @@ func TableauLabelAsset(label string, category string, assetType string, assetID 
 	return nil
 }
 
-// ** return
-/*
-func ApplyLabelValue(siteID string, assetType string, assetID string, label string) error {
-	// XML payload for applying label value
-	payload := fmt.Sprintf(`
-		<tsRequest>
-		  <contentList>
-		    <content contentType="%s" id="%s" />
-		  </contentList>
-		  <label
-		      value="%s"/>
-		</tsRequest>`, assetType, assetID, label)
-
-	// API endpoint
-	url := models.TableauURL() + "sites/" + models.Get_siteID() + "/labels"
-
-	// Create PUT request
-	response, err := MakeRequest(url, payload, "PUT", "xml")
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	return nil
-}
-*/
-func GetColumns(databaseName string, tableName string) (map[string]string, error) {
+func GetColumnIDs(databaseName string, tableName string) (string, map[string]string, error) {
 	payload := fmt.Sprintf(`
 		{
 			"query": "query columnQuery{\n    databases (filter: { name: \"%s\"}) {\n        tables (filter: { name: \"%s\"}){\n            columns{\n                luid\n                 name\n           }\n        }\n    }\n}",
@@ -147,7 +122,7 @@ func GetColumns(databaseName string, tableName string) (map[string]string, error
 	url := "https://10ax.online.tableau.com/api/metadata/graphql"
 	resp, err := MakeRequest(url, payload, "POST", "json")
 	if err != nil {
-		return nil, err
+		return "1", nil, err
 
 	}
 	defer resp.Body.Close()
@@ -155,16 +130,16 @@ func GetColumns(databaseName string, tableName string) (map[string]string, error
 	// Read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return "2", nil, err
 	}
 
 	// extract json
 	var responseData models.TableResponse
 	if err := json.Unmarshal(body, &responseData); err != nil {
-		return nil, err
+		return "3", nil, err
 	}
 	if len(responseData.Data.Databases) == 0 || len(responseData.Data.Databases[0].Tables) == 0 || len(responseData.Data.Databases[0].Tables[0].Columns) == 0 {
-		return nil, fmt.Errorf("no data found")
+		return "4", nil, fmt.Errorf("no data found")
 	}
 
 	// return map of col names and ids
@@ -173,6 +148,6 @@ func GetColumns(databaseName string, tableName string) (map[string]string, error
 		columns[c.Name] = c.LUID
 	}
 
-	return columns, nil
+	return responseData.Data.Databases[0].Tables[0].LUID, columns, nil
 
 }

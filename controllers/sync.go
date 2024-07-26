@@ -26,13 +26,12 @@ func (c *TableauController) PostSync() {
 		// ** download existing data
 		// ** merge both to handle overwrite, then publish
 		// **** check for existing API
-		if err := utils.TableauCreateDatasources(datasourceRecords, requestBody.SiteID, requestBody.ProjectID); err != nil {
+		if _, err := utils.CreateDatasources(datasourceRecords, requestBody.SiteID, requestBody.ProjectID); err != nil {
 			HandleError(c, http.StatusInternalServerError, err.Error())
 		}
 	}
 
-	// assets not being recognized
-
+	// assets not being recognized in dvdrentals
 	if err := utils.LabelAssets(datasourceRecords, requestBody.SiteID, requestBody.AttributeMap.ContentProfile, requestBody.AttributeMap.DataElements); err != nil {
 		HandleError(c, http.StatusInternalServerError, err.Error())
 	}
