@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// downloads .tds file of the given id and returns path where it has been stored
 func TableauDownloadDataSource(datasourceID string) (string, error) {
 	filePath := "storage/download.tds"
 

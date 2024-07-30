@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func GenerateTDSFile(filenameTDS string, datasource models.DatasourceStruct) error {
+func GenerateTDSFile(filePath string, filenameTDS string, datasource models.DatasourceStruct) error {
 	// create xml for file content
 	tdsBody, err := generateTDSBody("test", true, "win", "18.1", "https://10ax.online.tableau.com", "http://www.tableausoftware.com/xml/user", datasource)
 	if err != nil {
@@ -16,7 +16,7 @@ func GenerateTDSFile(filenameTDS string, datasource models.DatasourceStruct) err
 	}
 
 	// create tds file
-	file, err := os.Create("storage/" + filenameTDS)
+	file, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}

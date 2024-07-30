@@ -67,7 +67,7 @@ func TableauLabelAsset(label string, category string, assetType string, assetID 
 	return nil
 }
 
-func GetColumnIDs(databaseName string, tableName string) (string, map[string]string, error) {
+func GetAssetIDs(databaseName string, tableName string) (string, map[string]string, error) {
 	payload := fmt.Sprintf(`
 		{
 			"query": "query columnQuery{\n    databases (filter: { name: \"%s\"}) {\n        tables (filter: { name: \"%s\"}){\n            luid\n            columns{\n                luid\n                 name\n           }\n        }\n    }\n}",

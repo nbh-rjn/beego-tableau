@@ -11,7 +11,8 @@ import (
 	"os"
 )
 
-func PublishDatasource(filenameTDS string, datasourceName string, projectID string) (string, error) {
+// publishes file
+func PublishDatasource(filePath string, filenameTDS string, datasourceName string, projectID string) (string, error) {
 	url := models.TableauURL() + "sites/" + models.Get_siteID() + "/datasources?datasourceType=tds&overwrite=true"
 
 	// construct request payload
@@ -32,7 +33,7 @@ func PublishDatasource(filenameTDS string, datasourceName string, projectID stri
 	}
 
 	// add tableau_datasource file field
-	file, err := os.Open("storage/" + filenameTDS)
+	file, err := os.Open(filePath)
 	if err != nil {
 		return "", err
 	}

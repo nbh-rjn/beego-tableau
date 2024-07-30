@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// accepts attribute "datalabels", "projects", or "datasources" as param and returns info about the attribute
 func TableauGetAttributes(param string) ([]map[string]interface{}, error) {
 	attributeMap := map[string]string{
 		"datalabels":  "/labelValues",
@@ -38,6 +39,7 @@ func TableauGetAttributes(param string) ([]map[string]interface{}, error) {
 
 }
 
+// extracts attributes from an http response and returns them
 func extractAttributes(response *http.Response, attributeType string) ([]map[string]interface{}, error) {
 
 	var attributes []map[string]interface{}

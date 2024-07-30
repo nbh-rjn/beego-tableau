@@ -30,6 +30,7 @@ func (c *TableauController) PostSync() {
 
 			// tds filename
 			fileNameTDS := fmt.Sprintf("%s-%s.tds", datasourceRecord.Datasource, models.Get_siteID())
+			filePath := "storage/" + fileNameTDS
 
 			// get all current data sources
 			currentDatasources, err := lib.TableauGetAttributes("datasources")
@@ -63,12 +64,12 @@ func (c *TableauController) PostSync() {
 			}
 
 			// generate tds file for each datasource struct
-			if err := utils.GenerateTDSFile(fileNameTDS, datasourceRecord); err != nil {
+			if err := utils.GenerateTDSFile(filePath, fileNameTDS, datasourceRecord); err != nil {
 				errorMsg = err
 			}
 
 			// publish it
-			if _, err := lib.PublishDatasource(fileNameTDS, datasourceRecord.Datasource, requestBody.ProjectID); err != nil {
+			if _, err := lib.PublishDatasource(filePath, fileNameTDS, datasourceRecord.Datasource, requestBody.ProjectID); err != nil {
 				errorMsg = err
 			}
 
@@ -95,7 +96,7 @@ func (c *TableauController) PostSync() {
 		for _, table := range datasourceRecord.Tables {
 
 			// get ids of table and its columns
-			tableID, columnIDs, err := lib.GetColumnIDs(datasourceRecord.Database, table.TableName)
+			tableID, columnIDs, err := lib.GetAssetIDs(datasourceRecord.Database, table.TableName)
 			if err != nil {
 				errorMsg = err
 			}

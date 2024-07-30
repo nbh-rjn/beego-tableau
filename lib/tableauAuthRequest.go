@@ -9,6 +9,7 @@ import (
 	"net/http"
 )
 
+// performs authentication to Tableau and returns session token
 func TableauAuthRequest(patName string, patSecret string, contentURL string) (string, string, error) {
 
 	url := models.TableauURL() + "auth/signin"
