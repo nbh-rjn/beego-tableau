@@ -41,6 +41,28 @@ type User struct {
 	ID string `xml:"id,attr"`
 }
 
+// labels for an asset response
+type LabelResponse struct {
+	TSResponse
+	LabelList []Label `xml:"labelList>label"`
+}
+
+type Label struct {
+	ID              string `xml:"id,attr"`
+	UserDisplayName string `xml:"userDisplayName,attr"`
+	ContentID       string `xml:"contentId,attr"`
+	ContentType     string `xml:"contentType,attr"`
+	Message         string `xml:"message,attr"`
+	Value           string `xml:"value,attr"`
+	Category        string `xml:"category,attr"`
+	Active          bool   `xml:"active,attr"`
+	Elevated        bool   `xml:"elevated,attr"`
+	CreatedAt       string `xml:"createdAt,attr"`
+	UpdatedAt       string `xml:"updatedAt,attr"`
+	Site            Site   `xml:"site"`
+	Owner           Owner  `xml:"owner"`
+}
+
 // sync
 type AttributeMap struct {
 	DataElements   string `json:"data_elements"`
@@ -232,6 +254,7 @@ type CSVRecords struct {
 	ColumnDescription string `csv:"ColumnDescription"`
 	DataElements      string `csv:"DataElements"`
 }
+
 type ColumnStruct struct {
 	ColumnName        string
 	ColumnType        string

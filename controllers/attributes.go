@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"beego-project/lib"
-	"beego-project/models"
 	"net/http"
 	"strings"
 )
@@ -12,7 +11,7 @@ func (c *TableauController) GetAttribute() {
 	param := strings.ToLower(c.Ctx.Input.Param(":param"))
 
 	// using tableau REST API
-	attributes, err := lib.TableauGetAttributes(param, models.Get_siteID())
+	attributes, err := lib.TableauGetAttributes(param)
 	if err != nil {
 		HandleError(c, http.StatusInternalServerError, err.Error())
 	}

@@ -14,8 +14,8 @@ type TableauController struct {
 }
 
 func (c *TableauController) PostAuth() {
-	// no .tpl to render
-	c.EnableRender = false
+
+	c.EnableRender = false // no .tpl to render
 
 	// read request body
 	var requestBody models.CredentialStruct
@@ -25,15 +25,17 @@ func (c *TableauController) PostAuth() {
 
 	// get token from tableau api
 	credentialsToken, siteID, err := lib.TableauAuthRequest(requestBody.PersonalAccessTokenName, requestBody.PersonalAccessTokenSecret, requestBody.ContentUrl)
-
 	if err != nil {
 		HandleError(c, http.StatusBadRequest, err.Error())
 	}
 
+	// save for future use
 	models.SaveCredentials(credentialsToken, siteID)
 	models.SaveCredentialsDB(requestBody.PersonalAccessTokenName, requestBody.PersonalAccessTokenSecret, siteID)
 
-	// Return response data
+	//utils.ExtractTDS()
+
+	// Return response
 	c.Data["json"] = map[string]interface{}{
 		"credentialsToken": credentialsToken, "siteID": siteID,
 	}

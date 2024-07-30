@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func TableauGetAttributes(param string, site_id string) ([]map[string]interface{}, error) {
+func TableauGetAttributes(param string) ([]map[string]interface{}, error) {
 	attributeMap := map[string]string{
 		"datalabels":  "/labelValues",
 		"datasources": "/datasources",
@@ -18,7 +18,7 @@ func TableauGetAttributes(param string, site_id string) ([]map[string]interface{
 	if !found {
 		return nil, fmt.Errorf("invalid attribute")
 	}
-	url := models.TableauURL() + "sites/" + site_id + attribute
+	url := models.TableauURL() + "sites/" + models.Get_siteID() + attribute
 
 	// make new get request
 	request, err := http.NewRequest("GET", url, nil)

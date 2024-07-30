@@ -91,6 +91,16 @@
 				<ordinal>6</ordinal>
 			</metadata-record>
 			<metadata-record class="column">
+				<remote-name>customer_list.email</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[customer_list.email]</local-name>
+				<parent-name>[customer_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>customer_list.email</remote-alias>
+				<ordinal>6</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
 				<remote-name>film_list.actors</remote-name>
 				<remote-type>3</remote-type>
 				<local-name>[film_list.actors]</local-name>
@@ -431,6 +441,7 @@
 	<column caption="customer_list.phone" datatype="string" name="[customer_list.phone]" role="dimension" type="nominal"></column>
 	<column caption="customer_list.sid" datatype="integer" name="[customer_list.sid]" role="dimension" type="nominal"></column>
 	<column caption="customer_list.zip code" datatype="string" name="[customer_list.zip code]" role="dimension" type="nominal"></column>
+	<column caption="customer_list.email" datatype="string" name="[customer_list.email]" role="dimension" type="nominal"></column>
 	<column caption="film_list.actors" datatype="string" name="[film_list.actors]" role="dimension" type="nominal"></column>
 	<column caption="film_list.category" datatype="string" name="[film_list.category]" role="dimension" type="nominal"></column>
 	<column caption="film_list.description" datatype="string" name="[film_list.description]" role="dimension" type="nominal"></column>

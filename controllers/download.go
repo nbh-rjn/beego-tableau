@@ -9,9 +9,7 @@ import (
 
 func (c *TableauController) DownloadDataSource() {
 
-	// so it doesnt go looking in views for a tpl to render
 	c.EnableRender = false
-
 	var request models.DownloadRequest
 
 	// dont use c.bindJSON
@@ -21,8 +19,8 @@ func (c *TableauController) DownloadDataSource() {
 
 	filePath := "storage/download.tds"
 
-	// utility function to communicate with Tableau API
-	if err := lib.TableauDownloadDataSource(models.Get_siteID(), request.DatasourceID, filePath); err != nil {
+	// download this tds from this site and save to this filepath
+	if err := lib.TableauDownloadDataSource(request.DatasourceID); err != nil {
 		HandleError(c, http.StatusInternalServerError, "Failed to fetch data sources from Tableau")
 	}
 

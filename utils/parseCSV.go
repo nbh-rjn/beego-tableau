@@ -92,28 +92,27 @@ func organizeRecords(records []models.CSVRecords) ([]models.DatasourceStruct, er
 			ds_idx = record.Datasource
 			dsi = dsi + 1
 
-		} else {
-			if tb_idx != record.Table {
-				tb := models.TableStruct{
-					Id:              record.Id,
-					TableName:       record.Table,
-					TableType:       record.TableType,
-					ContentProfiles: record.ContentProfiles,
-				}
-
-				datasources[dsi].Tables = append(datasources[dsi].Tables, tb)
-				tb_idx = record.Table
-				tbi = tbi + 1
-			}
-			col := models.ColumnStruct{
-				ColumnName:        record.Column,
-				ColumnType:        record.ColumnType,
-				ColumnDescription: record.ColumnDescription,
-				DataElements:      record.DataElements,
-			}
-			datasources[dsi].Tables[tbi].Columns = append(datasources[dsi].Tables[tbi].Columns, col)
-
 		}
+		if tb_idx != record.Table {
+			tb := models.TableStruct{
+				Id:              record.Id,
+				TableName:       record.Table,
+				TableType:       record.TableType,
+				ContentProfiles: record.ContentProfiles,
+			}
+
+			datasources[dsi].Tables = append(datasources[dsi].Tables, tb)
+			tb_idx = record.Table
+			tbi = tbi + 1
+		}
+		col := models.ColumnStruct{
+			ColumnName:        record.Column,
+			ColumnType:        record.ColumnType,
+			ColumnDescription: record.ColumnDescription,
+			DataElements:      record.DataElements,
+		}
+		datasources[dsi].Tables[tbi].Columns = append(datasources[dsi].Tables[tbi].Columns, col)
+
 	}
 
 	return datasources, nil

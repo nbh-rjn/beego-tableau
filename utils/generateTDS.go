@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-func GenerateTDSFile(filenameTDS string, datasources []models.DatasourceStruct) error {
+func GenerateTDSFile(filenameTDS string, datasource models.DatasourceStruct) error {
 	// create xml for file content
-	tdsBody, err := generateTDSBody("test", true, "win", "18.1", "https://10ax.online.tableau.com", "http://www.tableausoftware.com/xml/user", datasources[0])
+	tdsBody, err := generateTDSBody("test", true, "win", "18.1", "https://10ax.online.tableau.com", "http://www.tableausoftware.com/xml/user", datasource)
 	if err != nil {
 		return err
 	}

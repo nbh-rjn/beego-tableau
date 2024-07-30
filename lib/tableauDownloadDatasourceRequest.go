@@ -9,8 +9,9 @@ import (
 	"strings"
 )
 
-func TableauDownloadDataSource(siteID string, datasourceID string, filePath string) error {
-	url := models.TableauURL() + "sites/" + siteID + "/datasources/" + datasourceID + "/content"
+func TableauDownloadDataSource(datasourceID string) error {
+	filePath := "storage/download.tds"
+	url := models.TableauURL() + "sites/" + models.Get_siteID() + "/datasources/" + datasourceID + "/content"
 
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {

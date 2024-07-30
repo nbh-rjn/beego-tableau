@@ -12,8 +12,8 @@ import (
 )
 
 // ** return datasource id
-func PublishDatasource(filenameTDS string, siteID string, datasourceName string, projectID string) (string, error) {
-	url := models.TableauURL() + "sites/" + siteID + "/datasources?datasourceType=tds&overwrite=true"
+func PublishDatasource(filenameTDS string, datasourceName string, projectID string) (string, error) {
+	url := models.TableauURL() + "sites/" + models.Get_siteID() + "/datasources?datasourceType=tds&overwrite=true"
 
 	// construct request payload
 	requestPayload := fmt.Sprintf(

@@ -114,7 +114,7 @@ func TableauLabelAsset(label string, category string, assetType string, assetID 
 func GetColumnIDs(databaseName string, tableName string) (string, map[string]string, error) {
 	payload := fmt.Sprintf(`
 		{
-			"query": "query columnQuery{\n    databases (filter: { name: \"%s\"}) {\n        tables (filter: { name: \"%s\"}){\n            columns{\n                luid\n                 name\n           }\n        }\n    }\n}",
+			"query": "query columnQuery{\n    databases (filter: { name: \"%s\"}) {\n        tables (filter: { name: \"%s\"}){\n            luid\n            columns{\n                luid\n                 name\n           }\n        }\n    }\n}",
 			"variables": {}
 		}`, databaseName, tableName)
 
@@ -122,7 +122,7 @@ func GetColumnIDs(databaseName string, tableName string) (string, map[string]str
 	url := "https://10ax.online.tableau.com/api/metadata/graphql"
 	resp, err := MakeRequest(url, payload, "POST", "json")
 	if err != nil {
-		return "1", nil, err
+		return "", nil, err
 
 	}
 	defer resp.Body.Close()
@@ -130,16 +130,16 @@ func GetColumnIDs(databaseName string, tableName string) (string, map[string]str
 	// Read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "2", nil, err
+		return "", nil, err
 	}
 
 	// extract json
 	var responseData models.TableResponse
 	if err := json.Unmarshal(body, &responseData); err != nil {
-		return "3", nil, err
+		return "", nil, err
 	}
 	if len(responseData.Data.Databases) == 0 || len(responseData.Data.Databases[0].Tables) == 0 || len(responseData.Data.Databases[0].Tables[0].Columns) == 0 {
-		return "4", nil, fmt.Errorf("no data found")
+		return "", nil, fmt.Errorf("no data found")
 	}
 
 	// return map of col names and ids
@@ -147,7 +147,7 @@ func GetColumnIDs(databaseName string, tableName string) (string, map[string]str
 	for _, c := range responseData.Data.Databases[0].Tables[0].Columns {
 		columns[c.Name] = c.LUID
 	}
-
+	fmt.Println(responseData)
 	return responseData.Data.Databases[0].Tables[0].LUID, columns, nil
 
 }
