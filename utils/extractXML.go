@@ -83,8 +83,8 @@ func ExtractAssets(filePath string, dsCSV models.DatasourceStruct) (models.Datas
 		return dsCSV, err
 	}
 
-	var dsExists models.DatasourceGeneration
-	err = xml.Unmarshal(data, &dsExists)
+	var dsTDS models.DatasourceGeneration
+	err = xml.Unmarshal(data, &dsTDS)
 	if err != nil {
 		return dsCSV, err
 	}
@@ -93,7 +93,7 @@ func ExtractAssets(filePath string, dsCSV models.DatasourceStruct) (models.Datas
 	var errorMsg error
 
 	// for every table in the already existing data source
-	for _, table := range dsExists.Connection.Relations {
+	for _, table := range dsTDS.Connection.Relations {
 
 		// fetch its ID and those of its columns
 		tableID, columnIDs, err := lib.TableauGetAssetIDs(dsCSV.Database, strings.Trim(table.Name, "[]"))
@@ -111,7 +111,7 @@ func ExtractAssets(filePath string, dsCSV models.DatasourceStruct) (models.Datas
 				found = true
 
 				// for every column of that table in already existing data source
-				for _, col := range dsExists.Connection.MetadataRecords.Records {
+				for _, col := range dsTDS.Connection.MetadataRecords.Records {
 					if strings.Trim(col.ParentName, "[]") == strings.Trim(table.Name, "[]") {
 
 						// if the column is not already parsed from csv
@@ -138,7 +138,7 @@ func ExtractAssets(filePath string, dsCSV models.DatasourceStruct) (models.Datas
 
 			var columns []models.ColumnStruct
 
-			for _, col := range dsExists.Connection.MetadataRecords.Records {
+			for _, col := range dsTDS.Connection.MetadataRecords.Records {
 				if strings.Trim(col.ParentName, "[]") == strings.Trim(table.Name, "[]") {
 
 					label, err := lib.TableauGetAssetLabel("column", columnIDs[col.RemoteName])
