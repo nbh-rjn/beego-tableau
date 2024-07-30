@@ -96,7 +96,7 @@ func ExtractAssets(filePath string, dsCSV models.DatasourceStruct) (models.Datas
 	for _, table := range dsExists.Connection.Relations {
 
 		// fetch its ID and those of its columns
-		tableID, columnIDs, err := lib.GetAssetIDs(dsCSV.Database, strings.Trim(table.Name, "[]"))
+		tableID, columnIDs, err := lib.TableauGetAssetIDs(dsCSV.Database, strings.Trim(table.Name, "[]"))
 		if err != nil {
 			errorMsg = err
 		}

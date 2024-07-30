@@ -12,7 +12,7 @@ import (
 )
 
 // publishes file
-func PublishDatasource(filePath string, filenameTDS string, datasourceName string, projectID string) (string, error) {
+func TableauPublishDatasource(filePath string, filenameTDS string, datasourceName string, projectID string) (string, error) {
 	url := models.TableauURL() + "sites/" + models.Get_siteID() + "/datasources?datasourceType=tds&overwrite=true"
 
 	// construct request payload

@@ -64,12 +64,12 @@ func (c *TableauController) PostSync() {
 			}
 
 			// generate tds file for each datasource struct
-			if err := utils.GenerateTDSFile(filePath, fileNameTDS, datasourceRecord); err != nil {
+			if err := utils.GenerateTDSFile(filePath, datasourceRecord); err != nil {
 				errorMsg = err
 			}
 
 			// publish it
-			if _, err := lib.PublishDatasource(filePath, fileNameTDS, datasourceRecord.Datasource, requestBody.ProjectID); err != nil {
+			if _, err := lib.TableauPublishDatasource(filePath, fileNameTDS, datasourceRecord.Datasource, requestBody.ProjectID); err != nil {
 				errorMsg = err
 			}
 
@@ -87,8 +87,8 @@ func (c *TableauController) PostSync() {
 	errorMsg = nil
 
 	// create label categories
-	lib.CreateCategory(requestBody.AttributeMap.ContentProfile)
-	lib.CreateCategory(requestBody.AttributeMap.DataElements)
+	lib.TableauCreateCategory(requestBody.AttributeMap.ContentProfile)
+	lib.TableauCreateCategory(requestBody.AttributeMap.DataElements)
 
 	for _, datasourceRecord := range datasourceRecords {
 
@@ -96,7 +96,7 @@ func (c *TableauController) PostSync() {
 		for _, table := range datasourceRecord.Tables {
 
 			// get ids of table and its columns
-			tableID, columnIDs, err := lib.GetAssetIDs(datasourceRecord.Database, table.TableName)
+			tableID, columnIDs, err := lib.TableauGetAssetIDs(datasourceRecord.Database, table.TableName)
 			if err != nil {
 				errorMsg = err
 			}

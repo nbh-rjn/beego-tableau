@@ -7,7 +7,7 @@ import (
 	"io"
 )
 
-func CreateCategory(category string) error {
+func TableauCreateCategory(category string) error {
 
 	url := models.TableauURL() + "sites/" + models.Get_siteID() + "/labelCategories"
 
@@ -28,6 +28,10 @@ func CreateCategory(category string) error {
 }
 
 func TableauLabelAsset(label string, category string, assetType string, assetID string) error {
+
+	// check this **
+	TableauCreateCategory(category)
+
 	// XML payload for creating label value
 	payload := fmt.Sprintf(`
 		<tsRequest>
@@ -67,7 +71,7 @@ func TableauLabelAsset(label string, category string, assetType string, assetID 
 	return nil
 }
 
-func GetAssetIDs(databaseName string, tableName string) (string, map[string]string, error) {
+func TableauGetAssetIDs(databaseName string, tableName string) (string, map[string]string, error) {
 	payload := fmt.Sprintf(`
 		{
 			"query": "query columnQuery{\n    databases (filter: { name: \"%s\"}) {\n        tables (filter: { name: \"%s\"}){\n            luid\n            columns{\n                luid\n                 name\n           }\n        }\n    }\n}",

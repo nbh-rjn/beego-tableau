@@ -7,34 +7,34 @@ import (
 	"net/http"
 )
 
-func MakeRequest(url string, payload string, method string, contenttype string) (*http.Response, error) {
+func MakeRequest(url string, payload string, method string, contentType string) (*http.Response, error) {
 
 	// Create PUT request
-	req, err := http.NewRequest(method, url, bytes.NewBuffer([]byte(payload)))
+	request, err := http.NewRequest(method, url, bytes.NewBuffer([]byte(payload)))
 	if err != nil {
 		return nil, err
 	}
 
 	// Headers
-	req.Header.Set("X-Tableau-Auth", models.Get_token())
-	if contenttype != "" {
-		req.Header.Set("Content-Type", "application/"+contenttype)
+	request.Header.Set("X-Tableau-Auth", models.Get_token())
+	if contentType != "" {
+		request.Header.Set("Content-Type", "application/"+contentType)
 	}
 
 	// HTTP client
 	client := &http.Client{}
 
 	// Send request
-	resp, err := client.Do(req)
+	response, err := client.Do(request)
 	if err != nil {
 		return nil, err
 	}
 
 	// Check response status
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}
 
-	return resp, nil
+	return response, nil
 
 }
