@@ -96,8 +96,8 @@ func (c *TableauController) PostSync() {
 	for _, datasourceRecord := range datasourceRecords {
 
 		// make channels
-		jobs := make(chan models.WorkerLabelInfo, 10)
-		results := make(chan error, 10)
+		jobs := make(chan models.WorkerLabelInfo, 20)
+		results := make(chan error, 20)
 
 		var wg sync.WaitGroup
 
