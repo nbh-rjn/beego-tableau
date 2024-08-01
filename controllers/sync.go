@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"runtime"
 	"sync"
+	"time"
 )
 
 func (c *TableauController) PostSync() {
@@ -84,8 +85,10 @@ func (c *TableauController) PostSync() {
 		HandleError(c, http.StatusInternalServerError, fmt.Sprintf("error creating assets: %s", errorMsg.Error()))
 	}
 
-	// cant label columns in dvdrentals
-	// cols not being recognized in dvdrentals
+	for i := range 5 {
+		time.Sleep(1 * time.Second)
+		fmt.Printf("%d ", i)
+	}
 
 	errorMsg = nil
 
@@ -146,13 +149,15 @@ func (c *TableauController) PostSync() {
 }
 
 func worker(id int, labelInfo <-chan models.WorkerLabelInfo, results chan<- error) {
-	//var info models.WorkerLabelInfo = <-labelInfo
 
 	for info := range labelInfo {
 		tableID, columnIDs, err := lib.TableauGetAssetIDs(info.DatabaseName, info.TableInfo.TableName)
+
+		fmt.Println(info.DatabaseName, tableID, info.TableInfo.TableName)
+
 		if err != nil {
-			//results <- err
-			//return
+			results <- err
+			return
 		}
 
 		// label table
@@ -166,19 +171,20 @@ func worker(id int, labelInfo <-chan models.WorkerLabelInfo, results chan<- erro
 		// loop through all columns of table
 		for _, column := range info.TableInfo.Columns {
 
-			if column.DataElements != "" && info.ColumnCategory != "" { // label column
-				columnID := columnIDs[column.ColumnName]
+			if column.DataElements != "" && info.ColumnCategory != "" {
+				// label column
+
+				columnID := columnIDs[fmt.Sprintf("%s.%s", info.TableInfo.TableName, column.ColumnName)]
+
 				if err := lib.TableauLabelAsset(column.DataElements, info.ColumnCategory, "column", columnID); err != nil {
-					//results <- err
-					//return
+					results <- err
+					return
 				}
 			}
 
 		}
 
-		log.Printf("worker %d completed %s\n", id, info.TableInfo.TableName)
 		results <- nil
 	}
-	//return
 
 }
