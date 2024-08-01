@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"runtime"
 	"sync"
 )
 
@@ -95,13 +96,13 @@ func (c *TableauController) PostSync() {
 	for _, datasourceRecord := range datasourceRecords {
 
 		// make channels
-		numJobs := len(datasourceRecord.Tables)
-		jobs := make(chan models.WorkerLabelInfo, numJobs)
-		results := make(chan error, numJobs)
+		jobs := make(chan models.WorkerLabelInfo, 10)
+		results := make(chan error, 10)
+
 		var wg sync.WaitGroup
 
 		// make workers
-		for id := 1; id <= numJobs; id++ {
+		for id := 1; id <= runtime.NumCPU(); id++ {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
@@ -122,12 +123,11 @@ func (c *TableauController) PostSync() {
 		// no more jobs
 		close(jobs)
 
-		for a := 1; a <= numJobs; a++ {
+		for i := 1; i <= len(datasourceRecord.Tables); i++ {
 			errorMsg = <-results
 			if errorMsg != nil {
 				log.Println(errorMsg)
 			}
-
 		}
 
 		wg.Wait()
@@ -146,37 +146,39 @@ func (c *TableauController) PostSync() {
 }
 
 func worker(id int, labelInfo <-chan models.WorkerLabelInfo, results chan<- error) {
-	var info models.WorkerLabelInfo = <-labelInfo
+	//var info models.WorkerLabelInfo = <-labelInfo
 
-	tableID, columnIDs, err := lib.TableauGetAssetIDs(info.DatabaseName, info.TableInfo.TableName)
-	if err != nil {
-		//results <- err
-		//return
-	}
-
-	// label table
-	if info.TableInfo.ContentProfiles != "" && info.TableCategory != "" {
-		if err := lib.TableauLabelAsset(info.TableInfo.ContentProfiles, info.TableCategory, "table", tableID); err != nil {
-			results <- err
-			return
+	for info := range labelInfo {
+		tableID, columnIDs, err := lib.TableauGetAssetIDs(info.DatabaseName, info.TableInfo.TableName)
+		if err != nil {
+			//results <- err
+			//return
 		}
-	}
 
-	// loop through all columns of table
-	for _, column := range info.TableInfo.Columns {
-
-		if column.DataElements != "" && info.ColumnCategory != "" { // label column
-			columnID := columnIDs[column.ColumnName]
-			if err := lib.TableauLabelAsset(column.DataElements, info.ColumnCategory, "column", columnID); err != nil {
-				//results <- err
-				//return
+		// label table
+		if info.TableInfo.ContentProfiles != "" && info.TableCategory != "" {
+			if err := lib.TableauLabelAsset(info.TableInfo.ContentProfiles, info.TableCategory, "table", tableID); err != nil {
+				results <- err
+				return
 			}
 		}
 
-	}
+		// loop through all columns of table
+		for _, column := range info.TableInfo.Columns {
 
-	log.Printf("worker %d completed %s\n", id, info.TableInfo.TableName)
-	results <- nil
+			if column.DataElements != "" && info.ColumnCategory != "" { // label column
+				columnID := columnIDs[column.ColumnName]
+				if err := lib.TableauLabelAsset(column.DataElements, info.ColumnCategory, "column", columnID); err != nil {
+					//results <- err
+					//return
+				}
+			}
+
+		}
+
+		log.Printf("worker %d completed %s\n", id, info.TableInfo.TableName)
+		results <- nil
+	}
 	//return
 
 }
