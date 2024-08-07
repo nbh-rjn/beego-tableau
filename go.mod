@@ -11,6 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.27
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.58.3
 	github.com/beego/beego v1.12.12
+	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/lib/pq v1.10.9
 	github.com/smartystreets/goconvey v1.6.4
 )

@@ -4,12 +4,18 @@ import (
 	"beego-project/lib"
 	"beego-project/models"
 	"beego-project/utils"
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"runtime"
 	"sync"
+
+	"github.com/cenkalti/backoff/v4"
 )
+
+const maxRetries = 5
 
 func (c *TableauController) PostSync() {
 	c.EnableRender = false
@@ -90,7 +96,7 @@ func (c *TableauController) PostSync() {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				worker(id, jobs, results)
+				worker(c.Ctx.Request.Context(), jobs, results)
 			}()
 		}
 
@@ -131,18 +137,31 @@ func (c *TableauController) PostSync() {
 
 }
 
-func worker(id int, labelInfo <-chan models.WorkerLabelInfo, results chan<- error) {
+func worker(c context.Context, labelInfo <-chan models.WorkerLabelInfo, results chan<- error) {
 
 	for info := range labelInfo {
 
-		tableID, columnIDs, err := lib.TableauGetAssetIDs(info.DatabaseName, info.TableInfo.TableName)
+		var tableID string
+		var columnIDs map[string]string
+
+		call := func() error {
+			t, c, err := lib.TableauGetAssetIDs(info.DatabaseName, info.TableInfo.TableName)
+			tableID = t
+			columnIDs = c
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+		err := CallWithRetry(c, call)
 		if err != nil {
 			results <- err
-			return
 		}
 
 		// label table
 		if info.TableInfo.ContentProfiles != "" && info.TableCategory != "" {
+
 			if err := lib.TableauLabelAsset(info.TableInfo.ContentProfiles, info.TableCategory, "table", tableID); err != nil {
 				results <- err
 				return
@@ -168,4 +187,27 @@ func worker(id int, labelInfo <-chan models.WorkerLabelInfo, results chan<- erro
 		results <- nil
 	}
 
+}
+
+func CallWithRetry(ctx context.Context, call func() error) error {
+	wrappedCall := func() error {
+		err := call()
+		if !canRetryError(err) {
+			return backoff.Permanent(err)
+		}
+		return err
+	}
+
+	b := backoff.WithMaxRetries(backoff.NewExponentialBackOff(), maxRetries)
+	return backoff.Retry(wrappedCall, backoff.WithContext(b, ctx))
+}
+
+func canRetryError(err error) bool {
+	if err == nil {
+		return false
+	}
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return false
+	}
+	return true
 }
