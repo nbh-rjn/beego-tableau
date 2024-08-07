@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"runtime"
 	"sync"
-	//"runtime"
-	//"sync"
 )
 
 func (c *TableauController) PostSync() {

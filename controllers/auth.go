@@ -24,7 +24,7 @@ func (c *TableauController) PostAuth() {
 	}
 
 	// get token from tableau api
-	credentialsToken, siteID, err := lib.TableauAuthRequest(requestBody.PersonalAccessTokenName, requestBody.PersonalAccessTokenSecret, requestBody.ContentUrl)
+	credentialsToken, siteID, err := lib.TableauAuthentication(requestBody.PersonalAccessTokenName, requestBody.PersonalAccessTokenSecret, requestBody.ContentUrl)
 	if err != nil {
 		HandleError(c, http.StatusBadRequest, err.Error())
 	}
