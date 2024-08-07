@@ -83,8 +83,19 @@ func (c *TableauController) PostSync() {
 
 	if requestBody.LabelAssets {
 
-		lib.TableauCreateCategory(requestBody.AttributeMap.ContentProfile)
-		lib.TableauCreateCategory(requestBody.AttributeMap.DataElements)
+		call := func() error {
+			if err := lib.TableauCreateCategory(requestBody.AttributeMap.ContentProfile); err != nil {
+				return err
+			}
+			if err := lib.TableauCreateCategory(requestBody.AttributeMap.DataElements); err != nil {
+				return err
+			}
+			return nil
+		}
+
+		if err := CallWithRetry(c.Ctx.Request.Context(), call); err != nil {
+			log.Println("error creating categories, attempting existing categories")
+		}
 
 		// make channels
 		jobs := make(chan models.WorkerLabelInfo, 20)
@@ -154,17 +165,20 @@ func worker(c context.Context, labelInfo <-chan models.WorkerLabelInfo, results 
 
 			return nil
 		}
-		err := CallWithRetry(c, call)
-		if err != nil {
+		if err := CallWithRetry(c, call); err != nil {
 			results <- err
 		}
 
 		// label table
 		if info.TableInfo.ContentProfiles != "" && info.TableCategory != "" {
-
-			if err := lib.TableauLabelAsset(info.TableInfo.ContentProfiles, info.TableCategory, "table", tableID); err != nil {
+			call := func() error {
+				if err := lib.TableauLabelAsset(info.TableInfo.ContentProfiles, info.TableCategory, "table", tableID); err != nil {
+					results <- err
+				}
+				return nil
+			}
+			if err := CallWithRetry(c, call); err != nil {
 				results <- err
-				return
 			}
 		}
 
@@ -177,10 +191,16 @@ func worker(c context.Context, labelInfo <-chan models.WorkerLabelInfo, results 
 				columnNameTableau := fmt.Sprintf("%s.%s", info.TableInfo.TableName, column.ColumnName)
 				columnID := columnIDs[columnNameTableau]
 
-				if err := lib.TableauLabelAsset(column.DataElements, info.ColumnCategory, "column", columnID); err != nil {
-					results <- err
-					return
+				call := func() error {
+					if err := lib.TableauLabelAsset(column.DataElements, info.ColumnCategory, "column", columnID); err != nil {
+						results <- err
+					}
+					return nil
 				}
+				if err := CallWithRetry(c, call); err != nil {
+					results <- err
+				}
+
 			}
 
 		}
