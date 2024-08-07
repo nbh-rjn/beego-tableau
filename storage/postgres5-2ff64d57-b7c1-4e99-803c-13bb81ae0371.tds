@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasource formatted-name="test" inline="true" source-platform="win" version="18.1" xml:base="https://10ax.online.tableau.com" xmlns:user="http://www.tableausoftware.com/xml/user">
+	<repository-location id="postgres5" path="/t/testsiteintern/datasources" revision="1.0" site="testsiteintern"></repository-location>
+	<connection class="sqlserver" dbname="dvdrentals" server="postgresql">
+		<relation name="customer_list" table="[public].[customer_list]" type="table"></relation>
+		<relation name="film_list" table="[public].[film_list]" type="table"></relation>
+		<relation name="nicer_but_slower_film_list" table="[public].[nicer_but_slower_film_list]" type="table"></relation>
+		<relation name="sales_by_film_category" table="[public].[sales_by_film_category]" type="table"></relation>
+		<relation name="sales_by_store" table="[public].[sales_by_store]" type="table"></relation>
+		<relation name="staff_list" table="[public].[staff_list]" type="table"></relation>
+		<relation name="store" table="[public].[store]" type="table"></relation>
+		<metadata-records>
+			<metadata-record class="column">
+				<remote-name>customer_list.address</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[customer_list.address]</local-name>
+				<parent-name>[customer_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>customer_list.address</remote-alias>
+				<ordinal>0</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>customer_list.city</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[customer_list.city]</local-name>
+				<parent-name>[customer_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>customer_list.city</remote-alias>
+				<ordinal>1</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>customer_list.country</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[customer_list.country]</local-name>
+				<parent-name>[customer_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>customer_list.country</remote-alias>
+				<ordinal>2</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>customer_list.id</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[customer_list.id]</local-name>
+				<parent-name>[customer_list]</parent-name>
+				<local-type>integer</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>customer_list.id</remote-alias>
+				<ordinal>3</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>customer_list.name</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[customer_list.name]</local-name>
+				<parent-name>[customer_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>customer_list.name</remote-alias>
+				<ordinal>4</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>customer_list.notes</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[customer_list.notes]</local-name>
+				<parent-name>[customer_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>customer_list.notes</remote-alias>
+				<ordinal>5</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>customer_list.phone</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[customer_list.phone]</local-name>
+				<parent-name>[customer_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>customer_list.phone</remote-alias>
+				<ordinal>6</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>customer_list.sid</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[customer_list.sid]</local-name>
+				<parent-name>[customer_list]</parent-name>
+				<local-type>integer</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>customer_list.sid</remote-alias>
+				<ordinal>7</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>customer_list.zip code</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[customer_list.zip code]</local-name>
+				<parent-name>[customer_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>customer_list.zip code</remote-alias>
+				<ordinal>8</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>film_list.actors</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[film_list.actors]</local-name>
+				<parent-name>[film_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>film_list.actors</remote-alias>
+				<ordinal>9</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>film_list.category</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[film_list.category]</local-name>
+				<parent-name>[film_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>film_list.category</remote-alias>
+				<ordinal>10</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>film_list.description</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[film_list.description]</local-name>
+				<parent-name>[film_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>film_list.description</remote-alias>
+				<ordinal>11</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>film_list.fid</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[film_list.fid]</local-name>
+				<parent-name>[film_list]</parent-name>
+				<local-type>integer</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>film_list.fid</remote-alias>
+				<ordinal>12</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>film_list.length</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[film_list.length]</local-name>
+				<parent-name>[film_list]</parent-name>
+				<local-type>integer</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>film_list.length</remote-alias>
+				<ordinal>13</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>film_list.price</remote-name>
+				<remote-type>5</remote-type>
+				<local-name>[film_list.price]</local-name>
+				<parent-name>[film_list]</parent-name>
+				<local-type>real</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>film_list.price</remote-alias>
+				<ordinal>14</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>film_list.rating</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[film_list.rating]</local-name>
+				<parent-name>[film_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>film_list.rating</remote-alias>
+				<ordinal>15</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>film_list.title</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[film_list.title]</local-name>
+				<parent-name>[film_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>film_list.title</remote-alias>
+				<ordinal>16</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>nicer_but_slower_film_list.actors</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[nicer_but_slower_film_list.actors]</local-name>
+				<parent-name>[nicer_but_slower_film_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>nicer_but_slower_film_list.actors</remote-alias>
+				<ordinal>17</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>nicer_but_slower_film_list.category</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[nicer_but_slower_film_list.category]</local-name>
+				<parent-name>[nicer_but_slower_film_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>nicer_but_slower_film_list.category</remote-alias>
+				<ordinal>18</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>nicer_but_slower_film_list.description</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[nicer_but_slower_film_list.description]</local-name>
+				<parent-name>[nicer_but_slower_film_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>nicer_but_slower_film_list.description</remote-alias>
+				<ordinal>19</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>nicer_but_slower_film_list.fid</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[nicer_but_slower_film_list.fid]</local-name>
+				<parent-name>[nicer_but_slower_film_list]</parent-name>
+				<local-type>integer</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>nicer_but_slower_film_list.fid</remote-alias>
+				<ordinal>20</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>nicer_but_slower_film_list.length</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[nicer_but_slower_film_list.length]</local-name>
+				<parent-name>[nicer_but_slower_film_list]</parent-name>
+				<local-type>integer</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>nicer_but_slower_film_list.length</remote-alias>
+				<ordinal>21</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>nicer_but_slower_film_list.price</remote-name>
+				<remote-type>5</remote-type>
+				<local-name>[nicer_but_slower_film_list.price]</local-name>
+				<parent-name>[nicer_but_slower_film_list]</parent-name>
+				<local-type>real</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>nicer_but_slower_film_list.price</remote-alias>
+				<ordinal>22</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>nicer_but_slower_film_list.rating</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[nicer_but_slower_film_list.rating]</local-name>
+				<parent-name>[nicer_but_slower_film_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>nicer_but_slower_film_list.rating</remote-alias>
+				<ordinal>23</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>nicer_but_slower_film_list.title</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[nicer_but_slower_film_list.title]</local-name>
+				<parent-name>[nicer_but_slower_film_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>nicer_but_slower_film_list.title</remote-alias>
+				<ordinal>24</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>sales_by_film_category.category</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[sales_by_film_category.category]</local-name>
+				<parent-name>[sales_by_film_category]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>sales_by_film_category.category</remote-alias>
+				<ordinal>25</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>sales_by_film_category.total_sales</remote-name>
+				<remote-type>5</remote-type>
+				<local-name>[sales_by_film_category.total_sales]</local-name>
+				<parent-name>[sales_by_film_category]</parent-name>
+				<local-type>real</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>sales_by_film_category.total_sales</remote-alias>
+				<ordinal>26</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>sales_by_store.manager</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[sales_by_store.manager]</local-name>
+				<parent-name>[sales_by_store]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>sales_by_store.manager</remote-alias>
+				<ordinal>27</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>sales_by_store.store</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[sales_by_store.store]</local-name>
+				<parent-name>[sales_by_store]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>sales_by_store.store</remote-alias>
+				<ordinal>28</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>sales_by_store.total_sales</remote-name>
+				<remote-type>5</remote-type>
+				<local-name>[sales_by_store.total_sales]</local-name>
+				<parent-name>[sales_by_store]</parent-name>
+				<local-type>real</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>sales_by_store.total_sales</remote-alias>
+				<ordinal>29</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>staff_list.address</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[staff_list.address]</local-name>
+				<parent-name>[staff_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>staff_list.address</remote-alias>
+				<ordinal>30</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>staff_list.city</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[staff_list.city]</local-name>
+				<parent-name>[staff_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>staff_list.city</remote-alias>
+				<ordinal>31</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>staff_list.country</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[staff_list.country]</local-name>
+				<parent-name>[staff_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>staff_list.country</remote-alias>
+				<ordinal>32</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>staff_list.id</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[staff_list.id]</local-name>
+				<parent-name>[staff_list]</parent-name>
+				<local-type>integer</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>staff_list.id</remote-alias>
+				<ordinal>33</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>staff_list.name</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[staff_list.name]</local-name>
+				<parent-name>[staff_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>staff_list.name</remote-alias>
+				<ordinal>34</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>staff_list.phone</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[staff_list.phone]</local-name>
+				<parent-name>[staff_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>staff_list.phone</remote-alias>
+				<ordinal>35</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>staff_list.sid</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[staff_list.sid]</local-name>
+				<parent-name>[staff_list]</parent-name>
+				<local-type>integer</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>staff_list.sid</remote-alias>
+				<ordinal>36</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>staff_list.zip code</remote-name>
+				<remote-type>130</remote-type>
+				<local-name>[staff_list.zip code]</local-name>
+				<parent-name>[staff_list]</parent-name>
+				<local-type>string</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>staff_list.zip code</remote-alias>
+				<ordinal>37</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>store.address_id</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[store.address_id]</local-name>
+				<parent-name>[store]</parent-name>
+				<local-type>integer</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>store.address_id</remote-alias>
+				<ordinal>38</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>store.last_update</remote-name>
+				<remote-type>135</remote-type>
+				<local-name>[store.last_update]</local-name>
+				<parent-name>[store]</parent-name>
+				<local-type>datetime</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>store.last_update</remote-alias>
+				<ordinal>39</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>store.manager_staff_id</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[store.manager_staff_id]</local-name>
+				<parent-name>[store]</parent-name>
+				<local-type>integer</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>store.manager_staff_id</remote-alias>
+				<ordinal>40</ordinal>
+			</metadata-record>
+			<metadata-record class="column">
+				<remote-name>store.store_id</remote-name>
+				<remote-type>3</remote-type>
+				<local-name>[store.store_id]</local-name>
+				<parent-name>[store]</parent-name>
+				<local-type>integer</local-type>
+				<contains-null>true</contains-null>
+				<remote-alias>store.store_id</remote-alias>
+				<ordinal>41</ordinal>
+			</metadata-record>
+		</metadata-records>
+	</connection>
+	<aliases enabled="yes"></aliases>
+	<column caption="customer_list.address" datatype="string" name="[customer_list.address]" role="dimension" type="nominal"></column>
+	<column caption="customer_list.city" datatype="string" name="[customer_list.city]" role="dimension" type="nominal"></column>
+	<column caption="customer_list.country" datatype="string" name="[customer_list.country]" role="dimension" type="nominal"></column>
+	<column caption="customer_list.id" datatype="integer" name="[customer_list.id]" role="dimension" type="nominal"></column>
+	<column caption="customer_list.name" datatype="string" name="[customer_list.name]" role="dimension" type="nominal"></column>
+	<column caption="customer_list.notes" datatype="string" name="[customer_list.notes]" role="dimension" type="nominal"></column>
+	<column caption="customer_list.phone" datatype="string" name="[customer_list.phone]" role="dimension" type="nominal"></column>
+	<column caption="customer_list.sid" datatype="integer" name="[customer_list.sid]" role="dimension" type="nominal"></column>
+	<column caption="customer_list.zip code" datatype="string" name="[customer_list.zip code]" role="dimension" type="nominal"></column>
+	<column caption="film_list.actors" datatype="string" name="[film_list.actors]" role="dimension" type="nominal"></column>
+	<column caption="film_list.category" datatype="string" name="[film_list.category]" role="dimension" type="nominal"></column>
+	<column caption="film_list.description" datatype="string" name="[film_list.description]" role="dimension" type="nominal"></column>
+	<column caption="film_list.fid" datatype="integer" name="[film_list.fid]" role="dimension" type="nominal"></column>
+	<column caption="film_list.length" datatype="integer" name="[film_list.length]" role="dimension" type="nominal"></column>
+	<column caption="film_list.price" datatype="real" name="[film_list.price]" role="dimension" type="nominal"></column>
+	<column caption="film_list.rating" datatype="string" name="[film_list.rating]" role="dimension" type="nominal"></column>
+	<column caption="film_list.title" datatype="string" name="[film_list.title]" role="dimension" type="nominal"></column>
+	<column caption="nicer_but_slower_film_list.actors" datatype="string" name="[nicer_but_slower_film_list.actors]" role="dimension" type="nominal"></column>
+	<column caption="nicer_but_slower_film_list.category" datatype="string" name="[nicer_but_slower_film_list.category]" role="dimension" type="nominal"></column>
+	<column caption="nicer_but_slower_film_list.description" datatype="string" name="[nicer_but_slower_film_list.description]" role="dimension" type="nominal"></column>
+	<column caption="nicer_but_slower_film_list.fid" datatype="integer" name="[nicer_but_slower_film_list.fid]" role="dimension" type="nominal"></column>
+	<column caption="nicer_but_slower_film_list.length" datatype="integer" name="[nicer_but_slower_film_list.length]" role="dimension" type="nominal"></column>
+	<column caption="nicer_but_slower_film_list.price" datatype="real" name="[nicer_but_slower_film_list.price]" role="dimension" type="nominal"></column>
+	<column caption="nicer_but_slower_film_list.rating" datatype="string" name="[nicer_but_slower_film_list.rating]" role="dimension" type="nominal"></column>
+	<column caption="nicer_but_slower_film_list.title" datatype="string" name="[nicer_but_slower_film_list.title]" role="dimension" type="nominal"></column>
+	<column caption="sales_by_film_category.category" datatype="string" name="[sales_by_film_category.category]" role="dimension" type="nominal"></column>
+	<column caption="sales_by_film_category.total_sales" datatype="real" name="[sales_by_film_category.total_sales]" role="dimension" type="nominal"></column>
+	<column caption="sales_by_store.manager" datatype="string" name="[sales_by_store.manager]" role="dimension" type="nominal"></column>
+	<column caption="sales_by_store.store" datatype="string" name="[sales_by_store.store]" role="dimension" type="nominal"></column>
+	<column caption="sales_by_store.total_sales" datatype="real" name="[sales_by_store.total_sales]" role="dimension" type="nominal"></column>
+	<column caption="staff_list.address" datatype="string" name="[staff_list.address]" role="dimension" type="nominal"></column>
+	<column caption="staff_list.city" datatype="string" name="[staff_list.city]" role="dimension" type="nominal"></column>
+	<column caption="staff_list.country" datatype="string" name="[staff_list.country]" role="dimension" type="nominal"></column>
+	<column caption="staff_list.id" datatype="integer" name="[staff_list.id]" role="dimension" type="nominal"></column>
+	<column caption="staff_list.name" datatype="string" name="[staff_list.name]" role="dimension" type="nominal"></column>
+	<column caption="staff_list.phone" datatype="string" name="[staff_list.phone]" role="dimension" type="nominal"></column>
+	<column caption="staff_list.sid" datatype="integer" name="[staff_list.sid]" role="dimension" type="nominal"></column>
+	<column caption="staff_list.zip code" datatype="string" name="[staff_list.zip code]" role="dimension" type="nominal"></column>
+	<column caption="store.address_id" datatype="integer" name="[store.address_id]" role="dimension" type="nominal"></column>
+	<column caption="store.last_update" datatype="datetime" name="[store.last_update]" role="dimension" type="nominal"></column>
+	<column caption="store.manager_staff_id" datatype="integer" name="[store.manager_staff_id]" role="dimension" type="nominal"></column>
+	<column caption="store.store_id" datatype="integer" name="[store.store_id]" role="dimension" type="nominal"></column>
+</datasource>
