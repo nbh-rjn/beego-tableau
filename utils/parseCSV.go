@@ -9,152 +9,75 @@ import (
 
 func ParseCSV(filename string) (models.DatasourceStruct, error) {
 
-	var ds models.DatasourceStruct
-	// open file
-	file, err := os.Open(filename)
-	if err != nil {
-		return ds, err
-	}
-	defer file.Close()
+	var datasource models.DatasourceStruct
 
 	// read file
+	file, err := os.Open(filename)
+	if err != nil {
+		return datasource, err
+	}
+	defer file.Close()
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil {
-		return ds, err
+		return datasource, err
 	}
 
-	// create empty array
-	var fcrecords []models.CSVRecords
+	// return if empty
+	if len(records) < 2 {
+		return datasource, fmt.Errorf("no records to parse in CSV")
+	}
+	/*
+		[0]  Id,
+		[1]  Datasource
+		[2]  Host
+		[3]  Port
+		[4]  DatabaseType
+		[5]  DBUsername
+		[6]  Database
+		[7]  Schema
+		[8]  Table
+		[9]  TableType
+		[10] ContentProfiles
+		[11] Column
+		[12] ColumnType
+		[13] ColumnDescription
+		[14] DataElements
+	*/
+	// data source info
+	datasource.Datasource = records[1][1]
+	datasource.Host = records[1][2]
+	datasource.Port = records[1][3]
+	datasource.DBType = records[1][4]
+	datasource.DBUsername = records[1][5]
+	datasource.Database = records[1][6]
+	datasource.Schema = records[1][7]
+
+	// organize cols and tables within struct
 
 	for i, record := range records {
 		if i == 0 {
 			continue
 		}
-		// store record values in elements of struct
-		fcrecord := models.CSVRecords{
-			Id:                record[0],
-			Datasource:        record[1],
-			Host:              record[2],
-			Port:              record[3],
-			DatabaseType:      record[4],
-			DBUsername:        record[5],
-			Database:          record[6],
-			Schema:            record[7],
-			Table:             record[8],
-			TableType:         record[9],
-			ContentProfiles:   record[10],
-			Column:            record[11],
+
+		if record[8] != records[i-1][8] {
+			datasource.Tables = append(datasource.Tables, models.TableStruct{
+				Id:              record[0],
+				TableName:       record[8],
+				TableType:       record[9],
+				ContentProfiles: record[10],
+			})
+		}
+		currentTableIdx := len(datasource.Tables) - 1
+
+		datasource.Tables[currentTableIdx].Columns = append(datasource.Tables[currentTableIdx].Columns, models.ColumnStruct{
+			ColumnName:        record[11],
 			ColumnType:        record[12],
 			ColumnDescription: record[13],
 			DataElements:      record[14],
-		}
-
-		// append to array
-		fcrecords = append(fcrecords, fcrecord)
-	}
-
-	if len(fcrecords) < 1 {
-		return ds, fmt.Errorf("no records to parse in CSV")
-	}
-
-	// return parsed array
-	return organizeRecords(fcrecords)
-}
-
-// takes fcrecords which is just lines of csv file
-// returns hierarchically arranged slice of structs
-// each struct representing one datasource
-func organizeRecords(records []models.CSVRecords) (models.DatasourceStruct, error) {
-
-	var datasource models.DatasourceStruct
-
-	if len(records) < 1 {
-		return datasource, fmt.Errorf("no records obtained from CSV to organize")
-	}
-
-	dsDetail := records[0]
-	ds := models.DatasourceStruct{
-		Datasource: dsDetail.Datasource,
-		Host:       dsDetail.Host,
-		Port:       dsDetail.Port,
-		Database:   dsDetail.Database,
-		Schema:     dsDetail.Schema,
-		DBUsername: dsDetail.DBUsername,
-		DBType:     dsDetail.DatabaseType,
-	}
-
-	lastTb := ""
-
-	for _, record := range records {
-		if record.Table != lastTb {
-			ds.Tables = append(ds.Tables, models.TableStruct{
-				Id:              record.Id,
-				TableName:       record.Table,
-				TableType:       record.TableType,
-				ContentProfiles: record.ContentProfiles,
-			})
-			lastTb = record.Table
-		}
-
-		currentTableIdx := len(ds.Tables) - 1
-
-		ds.Tables[currentTableIdx].Columns = append(ds.Tables[currentTableIdx].Columns, models.ColumnStruct{
-			ColumnName:        record.Column,
-			ColumnType:        record.ColumnType,
-			ColumnDescription: record.ColumnDescription,
-			DataElements:      record.DataElements,
 		})
 
 	}
-	return ds, nil
 
-	/*
-
-		ds_idx, tb_idx := "", ""
-		dsi, tbi := -1, -1
-
-		for _, record := range records {
-
-			if ds_idx != record.Datasource {
-				ds := models.DatasourceStruct{
-					Datasource: record.Datasource,
-					Host:       record.Host,
-					Port:       record.Port,
-					Database:   record.Database,
-					Schema:     record.Schema,
-					DBUsername: record.DBUsername,
-					DBType:     record.DatabaseType,
-				}
-
-				datasources = append(datasources, ds)
-				ds_idx = record.Datasource
-				dsi = dsi + 1
-
-			}
-			if tb_idx != record.Table {
-				tb := models.TableStruct{
-					Id:              record.Id,
-					TableName:       record.Table,
-					TableType:       record.TableType,
-					ContentProfiles: record.ContentProfiles,
-				}
-
-				datasources[dsi].Tables = append(datasources[dsi].Tables, tb)
-				tb_idx = record.Table
-				tbi = tbi + 1
-			}
-			col := models.ColumnStruct{
-				ColumnName:        record.Column,
-				ColumnType:        record.ColumnType,
-				ColumnDescription: record.ColumnDescription,
-				DataElements:      record.DataElements,
-			}
-			datasources[dsi].Tables[tbi].Columns = append(datasources[dsi].Tables[tbi].Columns, col)
-
-		}
-	*/
-
-	//return datasource, nil
-
+	return datasource, nil
 }

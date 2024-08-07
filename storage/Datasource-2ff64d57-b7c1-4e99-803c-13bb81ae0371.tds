@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <datasource formatted-name="test" inline="true" source-platform="win" version="18.1" xml:base="https://10ax.online.tableau.com" xmlns:user="http://www.tableausoftware.com/xml/user">
-	<repository-location id="postgres5" path="/t/testsiteintern/datasources" revision="1.0" site="testsiteintern"></repository-location>
-	<connection class="sqlserver" dbname="dvdrental" server="postgresql">
-		<relation name="customer_list" table="[public].[customer_list]" type="table"></relation>
-		<relation name="film_list" table="[public].[film_list]" type="table"></relation>
-		<relation name="nicer_but_slower_film_list" table="[public].[nicer_but_slower_film_list]" type="table"></relation>
-		<relation name="sales_by_film_category" table="[public].[sales_by_film_category]" type="table"></relation>
-		<relation name="sales_by_store" table="[public].[sales_by_store]" type="table"></relation>
-		<relation name="staff_list" table="[public].[staff_list]" type="table"></relation>
-		<relation name="store" table="[public].[store]" type="table"></relation>
+	<repository-location id="Datasource" path="/t/testsiteintern/datasources" revision="1.0" site="testsiteintern"></repository-location>
+	<connection class="sqlserver" dbname="Database" server="DatabaseType">
+		<relation name="customer_list" table="[Schema].[customer_list]" type="table"></relation>
+		<relation name="film_list" table="[Schema].[film_list]" type="table"></relation>
+		<relation name="nicer_but_slower_film_list" table="[Schema].[nicer_but_slower_film_list]" type="table"></relation>
+		<relation name="sales_by_film_category" table="[Schema].[sales_by_film_category]" type="table"></relation>
+		<relation name="sales_by_store" table="[Schema].[sales_by_store]" type="table"></relation>
+		<relation name="staff_list" table="[Schema].[staff_list]" type="table"></relation>
+		<relation name="store" table="[Schema].[store]" type="table"></relation>
 		<metadata-records>
 			<metadata-record class="column">
 				<remote-name>customer_list.address</remote-name>

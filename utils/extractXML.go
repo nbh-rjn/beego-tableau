@@ -6,70 +6,9 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"strings"
 )
-
-func ExtractAttributes(response *http.Response, attributeType string) ([]map[string]interface{}, error) {
-
-	var attributes []map[string]interface{}
-
-	responseBody, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	xmlData := string(responseBody)
-
-	switch attributeType {
-
-	case "datalabels":
-		var tsResponse models.LabelValueResponse
-
-		if err := xml.Unmarshal([]byte(xmlData), &tsResponse); err != nil {
-			return nil, err
-		}
-
-		for _, labelValue := range tsResponse.LabelValueList.LabelValues {
-			attributes = append(attributes, map[string]interface{}{
-				"name": labelValue.Name, "category": labelValue.Category,
-			})
-		}
-
-	case "datasources":
-
-		var tsResponse models.DatasourceResponse
-		if err := xml.Unmarshal([]byte(xmlData), &tsResponse); err != nil {
-			return nil, err
-		}
-
-		for _, datasource := range tsResponse.Datasources.Datasource {
-			attributes = append(attributes, map[string]interface{}{
-				"name": datasource.Name, "id": datasource.Id,
-			})
-		}
-
-	case "projects":
-
-		var tsResponse models.ProjectResponse
-		if err := xml.Unmarshal([]byte(xmlData), &tsResponse); err != nil {
-			return nil, err
-		}
-
-		for _, project := range tsResponse.Projects {
-			attributes = append(attributes, map[string]interface{}{
-				"name": project.Name, "id": project.ID,
-			})
-		}
-
-	default:
-		return nil, fmt.Errorf("invalid attribute type")
-	}
-
-	return attributes, nil
-
-}
 
 func ExtractAssets(fileName string, dsCSV models.DatasourceStruct) (models.DatasourceStruct, error) {
 
