@@ -17,13 +17,23 @@ func (c *TableauController) DownloadDataSource() {
 	// dont use c.bindJSON
 	if err := json.Unmarshal((c.Ctx.Input.CopyBody(1000)), &request); err != nil {
 		HandleError(c, http.StatusBadRequest, "Invalid JSON format in request")
+		return
 	}
 
 	// make api request
-	fileName, err := lib.TableauDownloadDataSource(request.DatasourceID)
+	fileName := ""
+	call := func() error {
+		f, err := lib.TableauDownloadDataSource(request.DatasourceID)
+		fileName = f
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 
-	if err != nil {
+	if err := CallWithRetry(c.Ctx.Request.Context(), call); err != nil {
 		HandleError(c, http.StatusInternalServerError, "Failed to fetch data sources from Tableau")
+		return
 	}
 
 	storage := models.GetStorage(context.TODO())
@@ -31,6 +41,7 @@ func (c *TableauController) DownloadDataSource() {
 		HandleError(c, http.StatusInternalServerError, "No storage handler found")
 		return
 	}
+
 	// Read the file from storage
 	fileData, err := storage.Read(context.TODO(), fileName)
 	if err != nil {
@@ -48,9 +59,19 @@ func (c *TableauController) GetAttribute() {
 	param := strings.ToLower(c.Ctx.Input.Param(":param"))
 
 	// using tableau REST API
-	attributes, err := lib.TableauGetAttributes(param)
-	if err != nil {
+	var attributes []map[string]interface{}
+	call := func() error {
+		a, err := lib.TableauGetAttributes(param)
+		attributes = a
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	if err := CallWithRetry(c.Ctx.Request.Context(), call); err != nil {
 		HandleError(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 
 	c.Data["json"] = map[string]interface{}{

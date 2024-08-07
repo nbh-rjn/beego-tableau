@@ -24,9 +24,22 @@ func (c *TableauController) PostAuth() {
 	}
 
 	// get token from tableau api
-	credentialsToken, siteID, err := lib.TableauAuthentication(requestBody.PersonalAccessTokenName, requestBody.PersonalAccessTokenSecret, requestBody.ContentUrl)
-	if err != nil {
+	credentialsToken := ""
+	siteID := ""
+
+	call := func() error {
+		ct, sid, err := lib.TableauAuthentication(requestBody.PersonalAccessTokenName, requestBody.PersonalAccessTokenSecret, requestBody.ContentUrl)
+		credentialsToken = ct
+		siteID = sid
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	if err := CallWithRetry(c.Ctx.Request.Context(), call); err != nil {
 		HandleError(c, http.StatusBadRequest, err.Error())
+		return
 	}
 
 	// save for future use

@@ -5,14 +5,11 @@ import (
 	"beego-project/models"
 	"beego-project/utils"
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"runtime"
 	"sync"
-
-	"github.com/cenkalti/backoff/v4"
 )
 
 const maxRetries = 5
@@ -37,8 +34,18 @@ func (c *TableauController) PostSync() {
 	if requestBody.CreateNewAssets {
 
 		// get all current data sources
-		currentDatasources, err := lib.TableauGetAttributes("datasources")
-		if err != nil {
+		var currentDatasources []map[string]interface{}
+
+		call := func() error {
+			cd, err := lib.TableauGetAttributes("datasources")
+			currentDatasources = cd
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+
+		if err := CallWithRetry(c.Ctx.Request.Context(), call); err != nil {
 			HandleError(c, http.StatusInternalServerError, "error fetching current data sources: "+err.Error())
 			return
 		}
@@ -50,8 +57,17 @@ func (c *TableauController) PostSync() {
 		if datasourceID, exists := utils.DatasourceExists(currentDatasources, datasourceRecord.Datasource); exists {
 
 			// download existing data source
-			fileName, err := lib.TableauDownloadDataSource(datasourceID)
-			if err != nil {
+			fileName := ""
+			call := func() error {
+				f, err := lib.TableauDownloadDataSource(datasourceID)
+				fileName = f
+				if err != nil {
+					return err
+				}
+				return nil
+			}
+
+			if err := CallWithRetry(c.Ctx.Request.Context(), call); err != nil {
 				HandleError(c, http.StatusInternalServerError, "error downloading tds file: "+err.Error())
 				return
 			}
@@ -74,7 +90,14 @@ func (c *TableauController) PostSync() {
 		}
 
 		// publish this file to this project
-		if _, err := lib.TableauPublishDatasource(fileNameTDS, datasourceRecord.Datasource, requestBody.ProjectId); err != nil {
+		call = func() error {
+			if _, err := lib.TableauPublishDatasource(fileNameTDS, datasourceRecord.Datasource, requestBody.ProjectId); err != nil {
+				return err
+			}
+			return nil
+		}
+
+		if err := CallWithRetry(c.Ctx.Request.Context(), call); err != nil {
 			HandleError(c, http.StatusInternalServerError, "error publishing data source: "+err.Error())
 			return
 		}
@@ -94,7 +117,7 @@ func (c *TableauController) PostSync() {
 		}
 
 		if err := CallWithRetry(c.Ctx.Request.Context(), call); err != nil {
-			log.Println("error creating categories, attempting existing categories")
+			log.Println("category already exists")
 		}
 
 		// make channels
@@ -207,27 +230,4 @@ func worker(c context.Context, labelInfo <-chan models.WorkerLabelInfo, results 
 		results <- nil
 	}
 
-}
-
-func CallWithRetry(ctx context.Context, call func() error) error {
-	wrappedCall := func() error {
-		err := call()
-		if !canRetryError(err) {
-			return backoff.Permanent(err)
-		}
-		return err
-	}
-
-	b := backoff.WithMaxRetries(backoff.NewExponentialBackOff(), maxRetries)
-	return backoff.Retry(wrappedCall, backoff.WithContext(b, ctx))
-}
-
-func canRetryError(err error) bool {
-	if err == nil {
-		return false
-	}
-	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-		return false
-	}
-	return true
 }
